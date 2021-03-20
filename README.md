@@ -6,6 +6,16 @@ Use this bundle to generate rss feeds with ease.
 ## Installation
 `composer require markocupic/rss-feed-generator-bundle`
 
+Add this to your config/bundles.php
+
+```php
+<?php
+
+return [
+    // ...
+    Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle::class => ['all' => true],
+];
+```
 
 Use dependency injection to require the feed factory in your controller.
 
