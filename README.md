@@ -1,12 +1,12 @@
 <img src="./src/Resources/public/logo.png" width="300">
 
-# Welcome to RSS Feed GeneratorBundle
+# RSS Feed Generator Bundle
 Use this bundle to generate rss feeds with ease.
 
 ## Installation
 `composer require markocupic/rss-feed-generator-bundle`
 
-***Option A:*** Add this to your config/bundles.php
+**Option A:** Add this to your config/bundles.php
 
 ```php
 <?php
@@ -16,21 +16,47 @@ return [
     Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle::class => ['all' => true],
 ];
 ```
-***Option B:*** Within Contao use the Contao Manager Plugin class
+**Option B:** In a Contao environment register the rss feed generator bundle in the ContaoManager Plugin class of your bundle
 ```php
+<?php
+
+declare(strict_types=1);
+
+namespace Contao\CoreBundle\ContaoManager;
+use Contao\CoreBundle\ContaoCoreBundle;
+use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
+use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
+use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
+use Contao\ManagerPlugin\Config\ConfigPluginInterface;
+use Contao\ManagerPlugin\Routing\RoutingPluginInterface;
+use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\Config\Loader\LoaderResolverInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle;
+use Acme\MyBundle\AcmeMyBundleBundle;
+
 /**
+ * Class Plugin
+ * Plugin for the Contao Manager.
+ */
+class Plugin implements BundlePluginInterface, RoutingPluginInterface, ConfigPluginInterface
+{
+    /**
      * {@inheritdoc}
      */
     public function getBundles(ParserInterface $parser)
     {
         return [
-            BundleConfig::create(Markocupic\SacEventToolBundle\MarkocupicSacEventToolBundle::class)
-                ->setLoadAfter([Contao\CoreBundle\ContaoCoreBundle::class])
-                ->setLoadAfter([Contao\CalendarBundle\ContaoCalendarBundle::class])
-                ->setLoadAfter([Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle::class])
+            BundleConfig::create(MarkocupicRssFeedGeneratorBundle::class),
+            // register other bundles
+            BundleConfig::create(AcmeMyBundle::class)
+            ->setLoadAfter(MarkocupicRssFeedGeneratorBundle::class)
+            ->setLoadAfter(ContaoCoreBundle::class)
         ];
     }
+
 ```
+
 Use dependency injection to require the feed factory in your controller.
 
 ```
