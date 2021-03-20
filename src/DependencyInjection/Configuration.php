@@ -30,14 +30,17 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('filter')
                     ->prototype('scalar')->end()
                     ->defaultValue([
+                        '&#40;' => '(',
+                        '&#41;' => ')',
                         '[-]' => '',
                         '&shy;' => '',
                         '[nbsp]' => ' ',
-                        '&nbsp;' => ' '
+                        '&nbsp;' => ' ',
                     ])
                 ->end()
 
         ;
+
         return $treeBuilder;
     }
 }

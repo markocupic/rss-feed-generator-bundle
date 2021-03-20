@@ -233,10 +233,9 @@ class Feed
         foreach ($feedItem->getData() as $key => $arrItem) {
             $strValue = $arrItem['value'];
 
-            if(!isset($arrItem['filter']) || empty($arrItem['filter']))
-            {
+            if (!isset($arrItem['filter']) || empty($arrItem['filter'])) {
                 $arrFilter = $this->arrFilter;
-            }else{
+            } else {
                 $arrFilter = $arrItem['filter'];
             }
 
@@ -266,7 +265,7 @@ class Feed
                 $this->addAttributes($element, $arrItem['attributes']);
             }
 
-            $node = $itemNode->appendChild($element);
+            $itemNode->appendChild($element);
         }
     }
 
