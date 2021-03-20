@@ -6,7 +6,7 @@ Use this bundle to generate rss feeds with ease.
 ## Installation
 `composer require markocupic/rss-feed-generator-bundle`
 
-Add this to your config/bundles.php
+***Option A:*** Add this to your config/bundles.php
 
 ```php
 <?php
@@ -16,7 +16,21 @@ return [
     Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle::class => ['all' => true],
 ];
 ```
-
+***Option B:*** Within Contao use the Contao Manager Plugin class
+```php
+/**
+     * {@inheritdoc}
+     */
+    public function getBundles(ParserInterface $parser)
+    {
+        return [
+            BundleConfig::create(Markocupic\SacEventToolBundle\MarkocupicSacEventToolBundle::class)
+                ->setLoadAfter([Contao\CoreBundle\ContaoCoreBundle::class])
+                ->setLoadAfter([Contao\CalendarBundle\ContaoCalendarBundle::class])
+                ->setLoadAfter([Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle::class])
+        ];
+    }
+```
 Use dependency injection to require the feed factory in your controller.
 
 ```
