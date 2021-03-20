@@ -1,38 +1,38 @@
 {
-    "name": "markocupic/rss-feed-generator-bundle",
-    "description": "Simple RSS feed generator. Generate RSS feeds inside a symfony controller.",
-    "keywords": [
-        "RSS",
-        "feed",
-        "symfony",
-    ],
-    "type": "symfony-bundle",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Marko Cupic",
-            "email": "m.cupic@gmx.ch",
-            "homepage": "https://github.com/markocupic",
-            "role": "Developer"
-        }
-    ],
-    "support": {
-        "issues": "https://github.com/markocupic/rss-feed-generator-bundle/issues",
-        "source": "https://github.com/markocupic/rss-feed-generator-bundle"
-    },
-    "require": {
-        "php": "^7.3 || ^8.0",
-        "symfony/framework-bundle": "^4.4|^5.2"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^8.4",
-        "symfony/http-client": "4.4.*",
-        "symfony/phpunit-bridge": "4.4.*",
-        "contao/easy-coding-standard": "^3.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Markocupic\\RssFeedGeneratorBundle\\": "src/"
-        }
+  "name": "markocupic/rss-feed-generator-bundle",
+  "description": "Simple RSS feed generator. Generate RSS feeds inside a symfony controller.",
+  "keywords": [
+    "RSS",
+    "feed",
+    "symfony"
+  ],
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Marko Cupic",
+      "email": "m.cupic@gmx.ch",
+      "homepage": "https://github.com/markocupic",
+      "role": "Developer"
     }
+  ],
+  "support": {
+    "issues": "https://github.com/markocupic/rss-feed-generator-bundle/issues",
+    "source": "https://github.com/markocupic/rss-feed-generator-bundle"
+  },
+  "require": {
+    "php": "^7.3 || ^8.0",
+    "symfony/framework-bundle": "^4.4|^5.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.4",
+    "symfony/http-client": "4.4.*",
+    "symfony/phpunit-bridge": "4.4.*",
+    "contao/easy-coding-standard": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Markocupic\\RssFeedGeneratorBundle\\": "src/"
+    }
+  }
 }
