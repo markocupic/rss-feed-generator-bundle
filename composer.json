@@ -21,7 +21,7 @@
     "source": "https://github.com/markocupic/rss-feed-generator-bundle"
   },
   "require": {
-    "php": "^7.3 || ^8.0",
+    "php": "^7.2 || ^8.0",
     "symfony/framework-bundle": "^4.4|^5.2"
   },
   "require-dev": {
