@@ -21,7 +21,6 @@
     "source": "https://github.com/markocupic/rss-feed-generator-bundle"
   },
   "require": {
-    "contao/core-bundle": "^4.9",
     "php": "^7.2 || ^8.0",
     "symfony/framework-bundle": "^4.4|^5.2"
   },
@@ -35,8 +34,5 @@
     "psr-4": {
       "Markocupic\\RssFeedGeneratorBundle\\": "src/"
     }
-  },
-  "extra": {
-    "contao-manager-plugin": "Markocupic\\RssFeedGeneratorBundle\\ContaoManager\\Plugin"
   }
 }
