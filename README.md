@@ -1,5 +1,4 @@
-![Alt text](src/Resources/public/logo.png?width=200)
-<img src="./src/Resources/public/logo.png?" width="300">
+<img src="./src/Resources/public/logo.png" width="300">
 
 # Welcome to RSS Feed GeneratorBundle
 Use this bundle to generate rss feeds with ease.
@@ -21,6 +20,67 @@ services:
       - '%kernel.project_dir%'
     public: true
 ```
+
+### Create feed
+```php
+// Use factory to generate the feed object
+$rss = $this->feedFactory->createFeed('utf-8');
+
+$rss->addTitle('Demo feed');
+$rss->addDescription('Latest demo events');
+$rss->addLink('https://foobar.ch');
+// etc.
+// Add additional elements (cdata = true)
+$rss->addAdditional('superField', 'some value', true);
+```
+
+### Filter oder replace content
+```php
+// filter or replace values
+$arrFilter = ['Foo' => '', 'bar' => 'foo'] ;
+$rss = $this->feedFactory->createFeed('utf-8');
+```
+
+### Add attributes
+```php
+// add attributes to the element
+$arrAttributes = ['src' => 'https://demo.ch', 'foo' => 'bar'] ;
+$rss = $this->feedFactory->createFeed('utf-8');
+$rss->addAdditional('superField', 'some value', true, [], $arrAttributes); // <superField src="https://demo.ch" foo="bar">some value</superField>
+```
+
+### Add items
+```
+$rss = $this->feedFactory->createFeed('utf-8');
+
+$rss->addTitle('Demo feed');
+$rss->addDescription('Latest demo events');
+// etc.
+
+// Use Factory to create feed item
+$item = $this->feedFactory->createFeedItem();
+
+// Add elements to the item
+$item->addTitle('Title');
+$item->addDescription('Here comes the description');
+$item->addLink('https://foobar.ch');
+$item->addAuthor('gaston_rebuffat@montblanc.fr');
+// etc. 
+
+// Add item node to the document
+$rss->addItem($item);
+```
+
+### Render and send content to browser.
+```
+return $rss->render();
+```
+
+### Or render and save content to the filesystem.
+```
+return $rss->render('web/share/myfeed.xml);
+```
+
 
 ## Generate RSS 2.0 feed inside a controller in a Symfony bundle
 
@@ -80,7 +140,7 @@ class FeedController extends AbstractController
      *
      * @Route("/_feed", name="demo_feed")
      */
-    public function generateFeed(int $section = 4250): Response
+    public function generateFeed(): Response
     {
         // Use factory to generate the feed object
         $rss = $this->feedFactory->createFeed('utf-8');
