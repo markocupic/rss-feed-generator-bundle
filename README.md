@@ -222,13 +222,6 @@ class FeedController extends AbstractController
     <ttl>60</ttl>
     <category>Fancy Events</category>
     <item>
-      <title>Hallenklettern Sonntagabend</title>
-      <description><![CDATA[Wöchentliches freies Training um an der persönlichen Klettertechnik zu arbeiten.]]></description>
-      <pubDate>Sat, 20 Feb 2021 16:59:58 +0100</pubDate>
-      <tourdb:startdate>2021-03-21</tourdb:startdate>
-      <tourdb:endDate>2021-03-21</tourdb:endDate>
-    </item>
-    <item>
       <title>Pizzo d'Orsirora</title>
       <description><![CDATA[Ski- und Snowboardtour auf der unbekannteren, weniger begangenen "Dark Side" von Realp mit kleinem Gipfel.]]></description>
       <link>https://myfancy-website.ch/feed/4567</link>
