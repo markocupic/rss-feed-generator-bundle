@@ -1,13 +1,12 @@
 {
     "name": "markocupic/rss-feed-generator-bundle",
-    "description": "simple rss feed generator",
+    "description": "Simple RSS feed generator. Generate RSS feeds inside a symfony controller.",
     "keywords": [
-        "contao",
-        "bundle",
-        "tag 3",
-        "tag 4"
+        "RSS",
+        "feed",
+        "symfony",
     ],
-    "type": "contao-bundle",
+    "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
         {
@@ -22,11 +21,10 @@
         "source": "https://github.com/markocupic/rss-feed-generator-bundle"
     },
     "require": {
-        "contao/core-bundle": "^4.9"
+        "php": "^7.3 || ^8.0",
+        "symfony/framework-bundle": "^4.4|^5.2"
     },
     "require-dev": {
-        "contao/manager-plugin": "^2.3",
-        "contao/test-case": "^4.0",
         "phpunit/phpunit": "^8.4",
         "symfony/http-client": "4.4.*",
         "symfony/phpunit-bridge": "4.4.*",
@@ -35,18 +33,6 @@
     "autoload": {
         "psr-4": {
             "Markocupic\\RssFeedGeneratorBundle\\": "src/"
-        },
-        "classmap": [
-            "src/Resources/contao"
-        ],
-        "exclude-from-classmap": [
-            "src/Resources/contao/config",
-            "src/Resources/contao/dca",
-            "src/Resources/contao/languages",
-            "src/Resources/contao/templates"
-        ]
-    },
-    "extra": {
-        "contao-manager-plugin": "Markocupic\\RssFeedGeneratorBundle\\ContaoManager\\Plugin"
+        }
     }
 }

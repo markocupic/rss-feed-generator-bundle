@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /*
  * This file is part of RSS Feed GeneratorBundle.
- * 
+ *
  * (c) Marko Cupic 2021 <m.cupic@gmx.ch>
  * @license MIT
  * For the full copyright and license information,
@@ -27,18 +27,17 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
-                ->arrayNode('foo')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->scalarNode('bar')
-                            ->cannotBeEmpty()
-                            ->defaultValue('***')
-                        ->end()
-                    ->end()
-                ->end() // end foo
-            ->end()
-        ;
+                ->arrayNode('filter')
+                    ->prototype('scalar')->end()
+                    ->defaultValue([
+                        '[-]' => '',
+                        '&shy;' => '',
+                        '[nbsp]' => ' ',
+                        '&nbsp;' => ' '
+                    ])
+                ->end()
 
+        ;
         return $treeBuilder;
     }
 }
