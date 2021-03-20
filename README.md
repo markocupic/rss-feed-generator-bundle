@@ -1,5 +1,5 @@
-![Alt text](src/Resources/public/logo.png?raw=true "logo")
-
+![Alt text](src/Resources/public/logo.png?width=200)
+<img src="./src/Resources/public/logo.png?" width="300">
 
 # Welcome to RSS Feed GeneratorBundle
 Use this bundle to generate rss feeds with ease.
