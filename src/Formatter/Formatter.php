@@ -15,12 +15,15 @@ declare(strict_types=1);
 namespace Markocupic\RssFeedGeneratorBundle\Formatter;
 
 use Markocupic\RssFeedGeneratorBundle\Feed\Feed;
-use Markocupic\RssFeedGeneratorBundle\XmlElement\XmlElement;
-use Markocupic\RssFeedGeneratorBundle\XmlElement\XmlElementGroup;
-use Markocupic\RssFeedGeneratorBundle\XmlElement\XmlElementInterface;
+use Markocupic\RssFeedGeneratorBundle\Item\Item;
+use Markocupic\RssFeedGeneratorBundle\Item\ItemGroup;
+use Markocupic\RssFeedGeneratorBundle\Item\ItemInterface;
 
 class Formatter
 {
+    /**
+     * @var array
+     */
     private $arrFilter;
 
     /**
@@ -33,6 +36,10 @@ class Formatter
      */
     private $dom;
 
+    /**
+     * Formatter constructor.
+     * @param array $arrFilter
+     */
     public function __construct(array $arrFilter)
     {
         $this->arrFilter = $arrFilter;
@@ -66,60 +73,68 @@ class Formatter
         // Add channel elements
         $arrChannelElements = $this->feed->getChannelFields();
 
-        /** @var \XmlElementInterface $xmlElement */
-        foreach ($arrChannelElements as $xmlElement) {
-            $this->appendElementIntoNode($xmlElement, $channel);
+        /** @var \ItemInterface $objItem */
+        foreach ($arrChannelElements as $objItem) {
+            $this->appendElementIntoNode($objItem, $channel);
         }
 
         // Add channel items
-        foreach ($this->feed->getItemFields() as $item) {
+        foreach ($this->feed->getChannelItemFields() as $item) {
             $this->addChannelItem($channel, $item);
         }
 
         return $this->dom->saveXML();
     }
 
-    private function addChannelItem(\DOMElement $channel, XmlElementInterface $xmlElementGroup): void
+    private function addChannelItem(\DOMElement $channel, ItemInterface $objItemGroup): void
     {
         $node = $this->dom->createElement('item');
         $node = $channel->appendChild($node);
-        $itemElements = $xmlElementGroup->getItemFields();
+        $itemElements = $objItemGroup->getChannelItemFields();
 
         foreach ($itemElements as $element) {
             $this->appendElementIntoNode($element, $node);
         }
     }
 
-    private function appendElementIntoNode(XmlElementInterface $xmlElement, \DomElement $node)
+    private function appendElementIntoNode(ItemInterface $objItem, \DomElement $node)
     {
-        $className = \get_class($xmlElement);
+        $className = \get_class($objItem);
 
         switch ($className) {
-            case XmlElement::class:
-                return $this->formatXmlElementField($xmlElement, $node);
+            case Item::class:
+                return $this->appendItemField($objItem, $node);
             break;
 
-            case XmlElementGroup::class:
-                return $this->formatXmlElementGroupField($xmlElement, $node);
+            case ItemGroup::class:
+                return $this->appendItemGroupField($objItem, $node);
                 break;
         }
     }
 
-    private function formatXmlElementField(XmlElement $xmlElement, $node): void
+    private function appendItemField(Item $objItem, \DOMElement $parentNode): \DOMElement
     {
-        $arrOptions = $xmlElement->getOptions();
-        $newElement = $this->dom->createElement($xmlElement->getName());
+        $arrOptions = $objItem->getOptions();
+        $newElement = $this->dom->createElement($objItem->getName());
 
         // Add attributes
-        $this->addAttributes($newElement, $xmlElement->getAttributes());
+        $this->addAttributes($newElement, $objItem->getAttributes());
 
-        if ($xmlElement->getContent()) {
-            $strContent = $xmlElement->getContent();
+        if ($objItem->getContent()) {
+            $strContent = $objItem->getContent();
 
-            foreach ($this->arrFilter as $search => $replace) {
-                $strContent = str_replace($search, $replace, $strContent);
+            // Filter
+            $arrFilter = $this->arrFilter;
+
+            if (isset($arrOptions['filter']) && \is_array($arrOptions['filter'])) {
+                $arrFilter = $arrOptions['filter'];
             }
 
+            foreach ($arrFilter as $search => $replace) {
+                $strContent = preg_replace($search, $replace, $strContent);
+            }
+
+            // Make cdata
             if (isset($arrOptions['cdata']) && $arrOptions['cdata']) {
                 $elementCdata = $this->dom->createCDATASection($strContent);
                 $newElement->appendChild($elementCdata);
@@ -128,43 +143,45 @@ class Formatter
             }
         }
 
-        $node->appendChild($newElement);
+        return $parentNode->appendChild($newElement);
     }
 
-    private function formatXmlElementGroupField(XmlElementGroup $xmlElementGroup, $node): void
+    private function appendItemGroupField(ItemGroup $objItemGroup, \DOMElement $parentNode): \DOMElement
     {
-        $newElement = $this->dom->createElement($xmlElementGroup->getName());
+        $newElement = $this->dom->createElement($objItemGroup->getName());
 
         // Add attributes
-        $this->addAttributes($newElement, $xmlElementGroup->getAttributes());
+        $this->addAttributes($newElement, $objItemGroup->getAttributes());
 
-        $items = $xmlElementGroup->getItemFields();
+        $items = $objItemGroup->getChannelItemFields();
 
         foreach ($items as $xmlSubElement) {
             $className = \get_class($xmlSubElement);
 
             switch ($className) {
                 // Element is a single field
-                case XmlElement::class:
-                    $this->formatXmlElementField($xmlSubElement, $newElement);
+                case Item::class:
+                    $this->appendItemField($xmlSubElement, $newElement);
                 break;
 
                 // Element is a group item
-                case XmlElementGroup::class:
-                    $this->formatXmlElementGroupField($xmlSubElement, $newElement);
+                case ItemGroup::class:
+                    $this->appendItemGroupField($xmlSubElement, $newElement);
                 break;
             }
         }
 
-        $node->appendChild($newElement);
+        return $parentNode->appendChild($newElement);
     }
 
-    private function addAttributes(\DomElement $node, array $arrAttributes): void
+    private function addAttributes(\DomElement $node, array $arrAttributes): array
     {
+        $elements = [];
         foreach ($arrAttributes as $attrName => $attrValue) {
             $attribute = $this->dom->createAttribute($attrName);
             $attribute->value = $attrValue;
-            $node->appendChild($attribute);
+            $elements[] = $node->appendChild($attribute);
         }
+        return $elements;
     }
 }

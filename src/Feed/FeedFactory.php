@@ -22,26 +22,16 @@ class FeedFactory
     private $feed;
 
     /**
-     * @var FeedItem
+     * FeedFactory constructor.
+     * @param Feed $feed
      */
-    private $feedItem;
-
-    /**
-     * Channel constructor.
-     */
-    public function __construct(Feed $feed, FeedItem $feedItem)
+    public function __construct(Feed $feed)
     {
         $this->feed = $feed;
-        $this->feedItem = $feedItem;
     }
 
     public function createFeed(string $encoding): Feed
     {
         return $this->feed->create($encoding);
-    }
-
-    public function createFeedItem(): FeedItem
-    {
-        return $this->feedItem->create();
     }
 }

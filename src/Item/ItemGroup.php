@@ -12,9 +12,9 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/rss-feed-generator-bundle
  */
 
-namespace Markocupic\RssFeedGeneratorBundle\XmlElement;
+namespace Markocupic\RssFeedGeneratorBundle\Item;
 
-class XmlElementGroup implements XmlElementInterface
+class ItemGroup implements ItemInterface
 {
     /**
      * @var string
@@ -32,16 +32,16 @@ class XmlElementGroup implements XmlElementInterface
     private $arrAttributes = [];
 
     /**
-     * XmlElementGroup constructor.
+     * ItemGroup constructor.
      *
-     * @param array | XmlElementInterface $itemFields
+     * @param array|ItemInterface $itemFields
      */
     public function __construct(string $name, $itemFields, array $arrAttributes = [])
     {
         $this->name = $name;
 
-        if (!\is_array($itemFields) && !$itemFields instanceof XmlElementInterface) {
-            throw new \RuntimeException('XmlElementGroup second argument shouls be an array or a singele ItemField instance.');
+        if (!\is_array($itemFields) && !$itemFields instanceof ItemInterface) {
+            throw new \RuntimeException('ItemGroup second argument shouls be an array or a singele ItemField instance.');
         }
 
         if (!\is_array($itemFields)) {
@@ -62,7 +62,7 @@ class XmlElementGroup implements XmlElementInterface
         return $this->arrAttributes;
     }
 
-    public function getItemFields(): array
+    public function getChannelItemFields(): array
     {
         return $this->itemFields;
     }

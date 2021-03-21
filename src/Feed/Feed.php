@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Markocupic\RssFeedGeneratorBundle\Feed;
 
 use Markocupic\RssFeedGeneratorBundle\Formatter\Formatter;
-use Markocupic\RssFeedGeneratorBundle\XmlElement\XmlElementInterface;
+use Markocupic\RssFeedGeneratorBundle\Item\ItemInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class Feed
@@ -35,15 +35,9 @@ class Feed
      */
     private $formatter;
 
-    /**
-     * @var \DOMElement|\DOMNode
-     */
-    private $rss;
 
-    /**
-     * @var \DOMNode
-     */
-    private $channel;
+
+
 
     /**
      * @var array
@@ -53,7 +47,7 @@ class Feed
     /**
      * @var array
      */
-    private $channelItems = [];
+    private $channelItemFields = [];
 
     /**
      * @var string
@@ -101,88 +95,37 @@ class Feed
         return $this->channelFields;
     }
 
-    public function getItemFields(): array
+    public function getChannelItemFields(): array
     {
-        return $this->channelItems;
+        return $this->channelItemFields;
     }
 
     public function setEncoding(string $strEncoding): self
     {
-        return $this->encoding = $strEncoding;
+        $this->encoding = $strEncoding;
 
         return $this;
     }
 
-    public function setFormatNicely(bool $blnFormatNicely): self
+    public function setFormatNicely(bool $bool): self
     {
-        return $this->formatNicely = $blnFormatNicely;
+        $this->formatNicely = $bool;
 
         return $this;
     }
 
-    public function addChannelField(XmlElementInterface $xmlElement): self
+    public function addChannelField(ItemInterface $objItem): self
     {
-        $this->channelFields[] = $xmlElement;
+        $this->channelFields[] = $objItem;
 
         return $this;
     }
 
-    public function addItemField(XmlElementInterface $xmlElementGroup): self
+    public function addChannelItemField(ItemInterface $objItem): self
     {
-        $this->channelItems[] = $xmlElementGroup;
+        $this->channelItemFields[] = $objItem;
 
         return $this;
-    }
-
-    /**
-     * @todo remove
-     * Add an item element to the channel node.
-     */
-    public function add(FeedItem $feedItem): void
-    {
-        if (!$feedItem->hasData()) {
-            return;
-        }
-
-        $itemNode = $this->channel->appendChild($this->xml->createElement('item'));
-
-        foreach ($feedItem->getData() as $key => $arrItem) {
-            $strValue = $arrItem['value'];
-
-            if (!isset($arrItem['filter']) || empty($arrItem['filter'])) {
-                $arrFilter = $this->arrFilter;
-            } else {
-                $arrFilter = $arrItem['filter'];
-            }
-
-            // Replace '[-]', '&shy;', '[nbsp]', '&nbsp;' with empty or whitespace string
-            foreach ($arrFilter as $search => $replace) {
-                $strValue = str_replace($search, $replace, $strValue);
-            }
-
-            $element = $this->xml->createElement($key);
-
-            if ($arrItem['cdata']) {
-                $elementCdata = $this->xml->createCDATASection($strValue);
-                $element->appendChild($elementCdata);
-            } else {
-                $element->textContent = $strValue;
-            }
-
-            // Remove node if it already exists
-            $nodes = $itemNode->getElementsByTagName($key);
-
-            foreach ($nodes as $node) {
-                $itemNode->removeChild($node);
-            }
-
-            // Add Attributes
-            if (!empty($arrItem['attributes']) && \is_array($arrItem['attributes'])) {
-                $this->addAttributes($element, $arrItem['attributes']);
-            }
-
-            $itemNode->appendChild($element);
-        }
     }
 
     /**
@@ -191,70 +134,28 @@ class Feed
      */
     public function render(string $path = ''): Response
     {
-
-
         $strBuffer = $this->formatter->render($this, $path);
 
         if (\strlen($path)) {
-            $this->saveInFilesystem($path,
-
-                $strBuffer);
+            $this->writeFileToFilesystem(
+                $path,
+                $strBuffer
+            );
         }
-
 
         $response = new Response($strBuffer);
         $response->setCharset($this->getEncoding());
+
         $strFilename = \strlen((string) $path) ? '; filename='.basename($path) : '';
         $response->headers->set('Content-Type', sprintf('application/rss+xml; charset=%s%s', $this->getEncoding(), $strFilename));
 
         return $response;
-
-    }
-
-    /**
-     * @tod remove
-     *
-     * @param false $blnCdata
-     */
-    private function appendChildToChannel(string $strNodeName, string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        if (empty($arrFilter)) {
-            $arrFilter = $this->arrFilter;
-        }
-
-        // Replace '[-]', '&shy;', '[nbsp]', '&nbsp;' with empty or whitespace string
-        foreach ($arrFilter as $search => $replace) {
-            $strValue = str_replace($search, $replace, $strValue);
-        }
-
-        $element = $this->xml->createElement($strNodeName);
-
-        if ($blnCdata) {
-            $elementCdata = $this->xml->createCDATASection($strValue);
-            $element->appendChild($elementCdata);
-        } else {
-            $element->textContent = $strValue;
-        }
-
-        // Remove node if it already exists
-        $nodes = $this->channel->getElementsByTagName($strNodeName);
-
-        foreach ($nodes as $node) {
-            $this->channel->removeChild($node);
-        }
-
-        // Add attributes
-        if (!empty($arrAttributes) && \is_array($arrAttributes)) {
-            $this->addAttributes($element, $arrAttributes);
-        }
-
-        $this->channel->appendChild($element);
     }
 
     /**
      * @return false|int
      */
-    private function saveInFilesystem(string $path, string $content)
+    private function writeFileToFilesystem(string $path, string $content)
     {
         return file_put_contents($path, $content);
     }

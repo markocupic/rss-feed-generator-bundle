@@ -12,9 +12,9 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/rss-feed-generator-bundle
  */
 
-namespace Markocupic\RssFeedGeneratorBundle\XmlElement;
+namespace Markocupic\RssFeedGeneratorBundle\Item;
 
-class XmlElement implements XmlElementInterface
+class Item implements ItemInterface
 {
     /**
      * @var string
@@ -36,7 +36,14 @@ class XmlElement implements XmlElementInterface
      */
     private $arrAttributes = [];
 
-    public function __construct(string $name, string $content, array $arrOptions=[], array $arrAttributes = [])
+    /**
+     * Item constructor.
+     * @param string $name
+     * @param string $content
+     * @param array $arrOptions
+     * @param array $arrAttributes
+     */
+    public function __construct(string $name, string $content, array $arrOptions = [], array $arrAttributes = [])
     {
         $this->name = $name;
         $this->content = $content;

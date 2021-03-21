@@ -47,6 +47,7 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface, ConfigPlu
     public function getBundles(ParserInterface $parser)
     {
         return [
+            // Register RSS feed generator bundle
             BundleConfig::create(MarkocupicRssFeedGeneratorBundle::class),
             // register other bundles
             BundleConfig::create(AcmeMyBundle::class)
@@ -76,57 +77,97 @@ services:
 // Use factory to generate the feed object
 $rss = $this->feedFactory->createFeed('utf-8');
 
-$rss->addTitle('Demo feed');
-$rss->addDescription('Latest demo events');
-$rss->addLink('https://foobar.ch');
-// etc.
-// Add additional elements (cdata = true)
-$rss->addAdditional('superField', 'some value', true);
+$rss->addChannelField(
+    new Item('title', 'Demo feed')
+);
+
+// Add CDATA element and an attribute
+$rss->addChannelField(
+    new Item('description', 'Check our news feed and have fun!', ['cdata' => true], ['attrName' => 'Here comes the attribute value'])
+);
+
+$rss->addChannelField(
+    new Item('link', 'https://foobar.ch')
+);
+
 ```
 
 ### Filter oder replace content
 ```php
 // filter or replace values
-$arrFilter = ['Foo' => '', 'bar' => 'foo'] ;
-$rss = $this->feedFactory->createFeed('utf-8');
+$arrFilter = ['Ferrari' => 'Italia', 'car' => 'country'] ;
+$rss->addChannelField(
+    new Item('description', 'Ferrari is my favourite car!', ['filter' => $arrFilter])
+);
+// <description>Italia is my favourite country!</description>
 ```
 
-### Add attributes
-```php
-// add attributes to the element
-$arrAttributes = ['src' => 'https://demo.ch', 'foo' => 'bar'] ;
-$rss = $this->feedFactory->createFeed('utf-8');
-$rss->addAdditional('superField', 'some value', true, [], $arrAttributes); // <superField src="https://demo.ch" foo="bar">some value</superField>
-```
 
 ### Add items
-```
+```php
+// Use factory to generate the feed object
 $rss = $this->feedFactory->createFeed('utf-8');
 
-$rss->addTitle('Demo feed');
-$rss->addDescription('Latest demo events');
-// etc.
+$rss->addChannelField(
+    new Item('title', 'Demo feed')
+);
+// ...
 
-// Use Factory to create feed item
-$item = $this->feedFactory->createFeedItem();
+// Retrieve data from database and add Items
+$results = $this->getEvents($section);
 
-// Add elements to the item
-$item->addTitle('Title');
-$item->addDescription('Here comes the description');
-$item->addLink('https://foobar.ch');
-$item->addAuthor('gaston_rebuffat@montblanc.fr');
-// etc. 
-
-// Add item node to the document
-$rss->addItem($item);
+if (null !== $results) {
+    while (false !== ($arrEvent = $results->fetch())) {
+        // Use ItemGroup to add a collection of items all on the same level
+        $rss->addChannelItemField(
+            new ItemGroup('item',[
+                new Item('title', $arrEvent['title']),
+                new Item('link', $arrEvent['link']),
+                new Item('description', $arrEvent['description'], ['cdata' => true]),
+                new Item('pubDate', date('r',(int) $arrEvent['tstamp'])),
+                new Item('author', $arrEvent['author']),
+                new Item('guid', $arrEvent['uuid']),
+                new Item('tourdb:startdate',date('Y-m-d', (int) $arrEvent['startDate'])),
+                new Item('tourdb:enddate',date('Y-m-d', (int) $arrEvent['endDate'])),
+            ])
+        );
+    }
+}
 ```
 
-### Render and send content to browser.
+### Nested items
+```php
+
+// Use ItemGroup to add a collection of items all on the same level
+$rss->addChannelItemField(
+    new ItemGroup('item',[
+        new Item('title', 'Title'),
+        new Item('link', 'https://foo.bar'),
+        new ItemGroup('nestedItems',[
+            new Item('subitem', 'Some content'),
+            new Item('subitem', 'Some content'),
+        ], ['foo'=> 'bar']),
+    ])
+);
+
+...
+<item>
+    <title>Title</title>
+    <link>https://foo.bar</link>
+    <nestedItem>
+        <subitem>Some content</subitem>
+        <subitem>Some content</subitem>
+    </nestedItem>
+</item>
+
+```
+
+### Render and send content to the browser.
 ```
 return $rss->render();
 ```
 
-### Or render and save content to the filesystem.
+### Render and save content to the filesystem.
 ```
 return $rss->render('web/share/myfeed.xml);
 ```
@@ -149,11 +190,13 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/rss-feed-generator-bundle
  */
 
-namespace Markocupic\DemoBundle\Controller\Feed;
+namespace Acme\DemoBundle\Controller\Feed;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Markocupic\RssFeedGeneratorBundle\Feed\FeedFactory;
+use Markocupic\RssFeedGeneratorBundle\Item\Item;
+use Markocupic\RssFeedGeneratorBundle\Feed\ItemGroup;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -176,112 +219,54 @@ class FeedController extends AbstractController
     private $projectDir;
 
     /**
-     * FeedController constructor.
+     * @Route("/_rssfeeds", name="rss_feed")
      */
-    public function __construct(FeedFactory $feedFactory, Connection $connection, string $projectDir)
+    public function printLatestEvents(int $section = 4250): Response
     {
-        $this->feedFactory = $feedFactory;
-        $this->connection = $connection;
-        $this->projectDir = $projectDir;
-    }
 
-    /**
-     * Generate RSS Feed.
-     *
-     * @Route("/_feed", name="demo_feed")
-     */
-    public function generateFeed(): Response
-    {
-        // Use factory to generate the feed object
         $rss = $this->feedFactory->createFeed('utf-8');
 
-        $rss->addTitle('Demo feed');
-        $rss->addDescription('Latest demo events');
-        $rss->addLink('https://foobar.ch');
-        $rss->addLanguage('en');
-        $rss->addCopyright('Copyright '.date('Y').', Gaston Rébuffat');
-        $rss->addPubDate(time() - 3600);
-        $rss->addLastBuildDate(time());
-        $rss->addTtl(60);
-        $rss->addCategory('Fancy Events');
+        $rss->addChannelField(
+            new Item('title', 'Acme news')
+        );
 
-        /**
-         * Retrieve data from db.
-         *
-         * @var QueryBuilder $qb
-         */
-        $qb = $this->connection->createQueryBuilder();
-        $qb->select('*')
-            ->from('tl_calendar_events', 't')
-            ->where('t.published = :published')
-            ->andWhere('t.startDate > :startDate')
-            ->setParameter('published', '1')
-            ->setParameter('startDate', time())
-            ->orderBy('t.startDate', 'ASC')
-            ->setMaxResults(50)
-        ;
+        $rss->addChannelField(
+            new Item('description', 'Enjoj our news.')
+        );
 
-        $results = $qb->execute();
+        $rss->addChannelField(
+            new Item('link', 'https://acme.com')
+        );
 
-        // Now add some items
+        $rss->addChannelField(
+            new Item('language', 'de')
+        );
+
+        $rss->addChannelField(
+            new Item('pubDate', date('r', (time() - 3600)))
+        );
+
+        // Retrieve data from db
+        $results = $this->getEvents($section);
+        
+        // Add some channe items
         if (null !== $results) {
             while (false !== ($arrEvent = $results->fetch())) {
-                // Use Factory to create feed item
-                $item = $this->feedFactory->createFeedItem();
+                $eventsModel = $calendarEventsModelAdapter->findByPk($arrEvent['id']);
 
-                // Now add elements to the item
-                $item->addTitle($arrEvent['title']);
-                $item->addLink($arrEvent['link']);
-                $item->addDescription($arrEvent['teaser'], true);
-                $item->addPubDate((int) $arrEvent['tstamp']);
-                $item->addAuthor($arrEvent['authorEmail']);
-                $item->addGuid($arrEvent['guuid']);
-                $item->addAdditional('tourdb:startdate', date('Y-m-d', (int) $arrEvent['startDate']));
-                $item->addAdditional('tourdb:endDate', date('Y-m-d', (int) $arrEvent['endDate']));
-
-                // Add item node to the document
-                $rss->addItem($item);
+                $rss->addChannelItemField(
+                    new ItemGroup('item',[
+                        new Item('title', $arrEvent['title']),
+                        new Item('link',$eventsAdapter->generateEventUrl($eventsModel, true)),
+                        new Item('description',$arrEvent['teaser'], ['cdata' => true]),
+                        new Item('pubDate', date('r',(int)$eventsModel->tstamp)),lode(', ', $calendarEventsHelperAdapter->getTourTypesAsArray($eventsModel, 'title'))),
+                    ])
+                );
             }
         }
 
-        /*
-         * call $rss->render() with path parameter to store content inthe filesystem
-         *
-         * $filename = $this->projectDir.'/web/share/rss_fancy_feed_.xml';
-         * $rss->render($filename);
-         */
-        return $rss->render();
+        return $rss->render($this->projectDir.'/web/share/rss.xml');
     }
 }
-
-```
-
-## Result
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<!--Generated with markocupic/rss-feed-generator-bundle. See https://github.com/markocupic/rss-feed-generator-bundle-->
-<rss version="2.0">
-  <channel>
-    <title>Demo feed</title>
-    <description><![CDATA[Latest demo events]]></description>
-    <link>https://myfancy-website.ch</link>
-    <language>en</language>
-    <copyright>Copyright 2021, Gaston Rébuffat</copyright>
-    <pubDate>Sat, 20 Mar 2021 19:07:06 +0100</pubDate>
-    <lastBuildDate>Sat, 20 Mar 2021 20:07:06 +0100</lastBuildDate>
-    <ttl>60</ttl>
-    <category>Fancy Events</category>
-    <item>
-      <title>Pizzo d'Orsirora</title>
-      <description><![CDATA[Ski- und Snowboardtour auf der unbekannteren, weniger begangenen "Dark Side" von Realp mit kleinem Gipfel.]]></description>
-      <link>https://myfancy-website.ch/feed/4567</link>
-      <pubDate>Mon, 15 Mar 2021 20:07:34 +0100</pubDate>
-      <author>gaston_rebuffat@montblanc.fr</author>
-      <guid>https://myfancy-website.ch/feed/4567</guid>
-      <tourdb:startdate>2021-03-21</tourdb:startdate>
-      <tourdb:endDate>2021-03-21</tourdb:endDate>
-    </item>
-  </channel>
-</rss>
 
 ```

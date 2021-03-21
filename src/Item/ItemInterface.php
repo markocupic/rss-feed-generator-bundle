@@ -12,9 +12,9 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/rss-feed-generator-bundle
  */
 
-namespace Markocupic\RssFeedGeneratorBundle\XmlElement;
+namespace Markocupic\RssFeedGeneratorBundle\Item;
 
-interface XmlElementInterface
+interface ItemInterface
 {
     public function getName(): string;
 }
