@@ -58,12 +58,11 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface, ConfigPlu
             ->setLoadAfter(ContaoCoreBundle::class)
         ];
     }
-
 ```
 
 Use dependency injection to require the feed factory in your controller.
 
-```
+```yml
 # src/Resources/config/services.yml
 services:
 
@@ -140,7 +139,6 @@ if (null !== $results) {
 
 ### Nested items
 ```php
-
 // Apend nested items with ItemGroup.
 $rss->addChannelItemField(
     new ItemGroup('item', [
@@ -152,8 +150,9 @@ $rss->addChannelItemField(
         ], ['foo'=> 'bar']),
     ])
 );
-
-...
+```
+Result:
+```xml
 <item>
     <title>Title</title>
     <link>https://foo.bar</link>
@@ -162,16 +161,15 @@ $rss->addChannelItemField(
         <subitem>Some content</subitem>
     </nestedItem>
 </item>
-
 ```
 
 ### Render and send content to the browser.
-```
+```php
 return $rss->render();
 ```
 
 ### Render and save content to the filesystem.
-```
+```php
 return $rss->render('web/share/myfeed.xml);
 ```
 
@@ -271,5 +269,4 @@ class FeedController extends AbstractController
         return $rss->render($this->projectDir.'/web/share/rss.xml');
     }
 }
-
 ```
