@@ -9,7 +9,7 @@ Use this bundle to generate rss feeds inside your Symfony application.
 ## Installation
 `composer require markocupic/rss-feed-generator-bundle`
 
-**Option A:** Add this to your config/bundles.php
+**Option A:** Add this to your config/bundles.php.
 
 ```php
 <?php
@@ -19,7 +19,7 @@ return [
     Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle::class => ['all' => true],
 ];
 ```
-**Option B:** In a Contao environment register the rss feed generator bundle in the ContaoManager Plugin class of your bundle
+**Option B:** In a **Contao** &#10084; environment register the rss feed generator bundle in the **Contao Manager Plugin* class of your bundle.
 ```php
 <?php
 
