@@ -1,7 +1,7 @@
 <img src="./src/Resources/public/logo.png" width="300">
 
 # RSS Feed Generator Bundle
-Use this bundle to generate rss feeds with ease.
+Use this bundle to generate rss feeds inside your Symfony application.
 
 ## Installation
 `composer require markocupic/rss-feed-generator-bundle`
@@ -92,7 +92,7 @@ $rss->addChannelField(
 
 ```
 
-### Filter oder replace content
+### Filter od replace content
 ```php
 // filter or replace values
 $arrFilter = ['Ferrari' => 'Italia', 'car' => 'country'] ;
@@ -118,17 +118,17 @@ $results = $this->getEvents($section);
 
 if (null !== $results) {
     while (false !== ($arrEvent = $results->fetch())) {
-        // Use ItemGroup to add a collection of items all on the same level
+        // Use ItemGroup to add a collection of items all of the same level.
         $rss->addChannelItemField(
-            new ItemGroup('item',[
+            new ItemGroup('item', [
                 new Item('title', $arrEvent['title']),
                 new Item('link', $arrEvent['link']),
                 new Item('description', $arrEvent['description'], ['cdata' => true]),
                 new Item('pubDate', date('r',(int) $arrEvent['tstamp'])),
                 new Item('author', $arrEvent['author']),
                 new Item('guid', $arrEvent['uuid']),
-                new Item('tourdb:startdate',date('Y-m-d', (int) $arrEvent['startDate'])),
-                new Item('tourdb:enddate',date('Y-m-d', (int) $arrEvent['endDate'])),
+                new Item('tourdb:startdate', date('Y-m-d', (int) $arrEvent['startDate'])),
+                new Item('tourdb:enddate', date('Y-m-d', (int) $arrEvent['endDate'])),
             ])
         );
     }
@@ -138,12 +138,12 @@ if (null !== $results) {
 ### Nested items
 ```php
 
-// Use ItemGroup to add a collection of items all on the same level
+// Apend nested items with ItemGroup.
 $rss->addChannelItemField(
-    new ItemGroup('item',[
+    new ItemGroup('item', [
         new Item('title', 'Title'),
         new Item('link', 'https://foo.bar'),
-        new ItemGroup('nestedItems',[
+        new ItemGroup('nestedItems', [
             new Item('subitem', 'Some content'),
             new Item('subitem', 'Some content'),
         ], ['foo'=> 'bar']),
@@ -221,7 +221,7 @@ class FeedController extends AbstractController
     /**
      * @Route("/_rssfeeds", name="rss_feed")
      */
-    public function printLatestEvents(int $section = 4250): Response
+    public function printLatestEvents(): Response
     {
 
         $rss = $this->feedFactory->createFeed('utf-8');
@@ -255,11 +255,11 @@ class FeedController extends AbstractController
                 $eventsModel = $calendarEventsModelAdapter->findByPk($arrEvent['id']);
 
                 $rss->addChannelItemField(
-                    new ItemGroup('item',[
+                    new ItemGroup('item', [
                         new Item('title', $arrEvent['title']),
-                        new Item('link',$eventsAdapter->generateEventUrl($eventsModel, true)),
-                        new Item('description',$arrEvent['teaser'], ['cdata' => true]),
-                        new Item('pubDate', date('r',(int)$eventsModel->tstamp)),lode(', ', $calendarEventsHelperAdapter->getTourTypesAsArray($eventsModel, 'title'))),
+                        new Item('link', $arrEvent['link']),
+                        new Item('description', $arrEvent['description'], ['cdata' => true]),
+                        new Item('pubDate', date('r', (int) $eventsModel->tstamp)),
                     ])
                 );
             }
