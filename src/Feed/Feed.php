@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Markocupic\RssFeedGeneratorBundle\Feed;
 
+use Markocupic\RssFeedGeneratorBundle\Formatter\Formatter;
+use Markocupic\RssFeedGeneratorBundle\XmlElement\XmlElementInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class Feed
@@ -22,10 +24,16 @@ class Feed
      * @var \DOMDocument
      */
     public $xml;
+
     /**
-     * @var array
+     * @var string
      */
-    private $arrFilter;
+    private $version;
+
+    /**
+     * @var Formatter
+     */
+    private $formatter;
 
     /**
      * @var \DOMElement|\DOMNode
@@ -38,191 +46,99 @@ class Feed
     private $channel;
 
     /**
+     * @var array
+     */
+    private $channelFields = [];
+
+    /**
+     * @var array
+     */
+    private $channelItems = [];
+
+    /**
      * @var string
      */
     private $encoding;
 
-    public function __construct(array $arrFilter)
+    /**
+     * @var bool
+     */
+    private $formatNicely = true;
+
+    public function __construct(Formatter $formatter)
     {
-        $this->arrFilter = $arrFilter;
+        $this->formatter = $formatter;
     }
 
     /**
      * @return $this
      */
-    public function create(string $encoding = 'utf-8'): self
+    public function create(): self
     {
-        $this->encoding = $encoding;
-
-        $this->xml = new \DOMDocument('1.0', $this->encoding);
-
-        // Format nicely
-        $this->formatNicely(true);
-
-        // Add comment
-        $comment = $this->xml->createComment('Generated with markocupic/rss-feed-generator-bundle. See https://github.com/markocupic/rss-feed-generator-bundle');
-        $this->xml->appendChild($comment);
-
-        // Create element "rss"
-        $rss = $this->xml->createElement('rss');
-        $this->rss = $this->xml->appendChild($rss);
-        $this->rss->setAttribute('version', '2.0');
-
-        // Create element "channel"
-        $channel = $this->xml->createElement('channel');
-        $this->channel = $this->rss->appendChild($channel);
+        $this->encoding = 'utf-8';
+        $this->version = '2.0';
 
         return $this;
     }
 
-    public function formatNicely(bool $bool): void
+    public function getVersion(): string
     {
-        if ($bool) {
-            $this->xml->preserveWhiteSpace = false;
-            $this->xml->formatOutput = true;
-        } else {
-            $this->xml->preserveWhiteSpace = true;
-            $this->xml->formatOutput = false;
-        }
+        return $this->version;
+    }
+
+    public function getFormatNicely(): bool
+    {
+        return $this->formatNicely;
+    }
+
+    public function getEncoding(): string
+    {
+        return $this->encoding;
+    }
+
+    public function getChannelFields(): array
+    {
+        return $this->channelFields;
+    }
+
+    public function getItemFields(): array
+    {
+        return $this->channelItems;
+    }
+
+    public function setEncoding(string $strEncoding): self
+    {
+        return $this->encoding = $strEncoding;
+
+        return $this;
+    }
+
+    public function setFormatNicely(bool $blnFormatNicely): self
+    {
+        return $this->formatNicely = $blnFormatNicely;
+
+        return $this;
+    }
+
+    public function addChannelField(XmlElementInterface $xmlElement): self
+    {
+        $this->channelFields[] = $xmlElement;
+
+        return $this;
+    }
+
+    public function addItemField(XmlElementInterface $xmlElementGroup): self
+    {
+        $this->channelItems[] = $xmlElementGroup;
+
+        return $this;
     }
 
     /**
-     * mandatory channel field.
-     */
-    public function addTitle(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('title', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * mandatory channel field.
-     */
-    public function addLink(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('link', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * mandatory channel field.
-     */
-    public function addDescription(string $strValue, $blnCdata = true, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $strValue = preg_replace('/[\n\r]+/', ' ', $strValue);
-
-        $this->appendChildToChannel('description', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addManagingEditor(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('managingEditor', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addWebMaster(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('webMaster', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addDocs(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('docs', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addCloud(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('cloud', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addLanguage(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('language', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addCopyright(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('copyright', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addPubDate(int $strValue, array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('pubDate', date('r', $strValue), false, [], $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addLastBuildDate(int $strValue, array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('lastBuildDate', date('r', $strValue), false, [], $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addTtl(int $strValue, array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('ttl', (string) $strValue, false, [], $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addCategory(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('category', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addAuthor(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('author', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * optional channel field.
-     */
-    public function addGenerator(string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel('generator', $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
-     * Add additional elements to item.
-     *
-     * @param false $blnCdata
-     * @param false $strValue
-     */
-    public function addAdditional(string $attrName, string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
-    {
-        $this->appendChildToChannel($attrName, $strValue, $blnCdata, $arrFilter, $arrAttributes);
-    }
-
-    /**
+     * @todo remove
      * Add an item element to the channel node.
      */
-    public function addItem(FeedItem $feedItem): void
+    public function add(FeedItem $feedItem): void
     {
         if (!$feedItem->hasData()) {
             return;
@@ -275,19 +191,31 @@ class Feed
      */
     public function render(string $path = ''): Response
     {
-        $content = $this->xml->saveXML();
+
+
+        $strBuffer = $this->formatter->render($this, $path);
 
         if (\strlen($path)) {
-            $this->saveInFilesystem($path, $content);
+            $this->saveInFilesystem($path,
+
+                $strBuffer);
         }
 
-        $response = new Response($content);
-        $response->setCharset($this->encoding);
-        $response->headers->set('Content-Type', 'application/rss+xml; charset='.$this->encoding.'; filename='.basename($path));
+
+        $response = new Response($strBuffer);
+        $response->setCharset($this->getEncoding());
+        $strFilename = \strlen((string) $path) ? '; filename='.basename($path) : '';
+        $response->headers->set('Content-Type', sprintf('application/rss+xml; charset=%s%s', $this->getEncoding(), $strFilename));
 
         return $response;
+
     }
 
+    /**
+     * @tod remove
+     *
+     * @param false $blnCdata
+     */
     private function appendChildToChannel(string $strNodeName, string $strValue, $blnCdata = false, array $arrFilter = [], array $arrAttributes = []): void
     {
         if (empty($arrFilter)) {
@@ -321,15 +249,6 @@ class Feed
         }
 
         $this->channel->appendChild($element);
-    }
-
-    private function addAttributes(\DomElement $node, array $arrAttributes): void
-    {
-        foreach ($arrAttributes as $attrName => $attrValue) {
-            $attribute = $this->xml->createAttribute($attrName);
-            $attribute->value = $attrValue;
-            $node->appendChild($attribute);
-        }
     }
 
     /**

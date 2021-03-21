@@ -53,6 +53,5 @@ class MarkocupicRssFeedGeneratorExtension extends Extension
         $rootKey = $this->getAlias();
 
         $container->setParameter($rootKey.'.filter', $config['filter']);
-
     }
 }

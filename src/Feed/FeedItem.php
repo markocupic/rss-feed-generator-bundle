@@ -16,7 +16,6 @@ namespace Markocupic\RssFeedGeneratorBundle\Feed;
 
 class FeedItem
 {
-
     private $arrData = [];
 
     public function create(): self
