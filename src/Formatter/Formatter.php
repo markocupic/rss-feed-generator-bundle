@@ -38,7 +38,6 @@ class Formatter
 
     /**
      * Formatter constructor.
-     * @param array $arrFilter
      */
     public function __construct(array $arrFilter)
     {
@@ -135,7 +134,7 @@ class Formatter
             }
 
             // Make cdata
-            if (isset($arrOptions['cdata']) && $arrOptions['cdata']) {
+            if (null !== $strContent && is_string($strContent) && isset($arrOptions['cdata']) && $arrOptions['cdata']) {
                 $elementCdata = $this->dom->createCDATASection($strContent);
                 $newElement->appendChild($elementCdata);
             } else {
@@ -177,11 +176,13 @@ class Formatter
     private function addAttributes(\DomElement $node, array $arrAttributes): array
     {
         $elements = [];
+
         foreach ($arrAttributes as $attrName => $attrValue) {
             $attribute = $this->dom->createAttribute($attrName);
             $attribute->value = $attrValue;
             $elements[] = $node->appendChild($attribute);
         }
+
         return $elements;
     }
 }

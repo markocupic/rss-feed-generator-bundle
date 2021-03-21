@@ -29,6 +29,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->arrayNode('filter')
                     ->prototype('scalar')->end()
+                    ->useAttributeAsKey('name')
                     ->defaultValue([
                         '/[\n\r]+/' => ' ',
                         '/&#40;/' => '(',
