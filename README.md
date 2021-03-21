@@ -19,7 +19,7 @@ return [
     Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle::class => ['all' => true],
 ];
 ```
-**Option B:** In a **Contao** &#10084; environment register the rss feed generator bundle in the **Contao Manager Plugin* class of your bundle.
+**Option B:** In a **Contao** &#10084; environment register the rss feed generator bundle in the **Contao Manager Plugin** class of your bundle.
 ```php
 <?php
 
