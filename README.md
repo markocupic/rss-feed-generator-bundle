@@ -4,7 +4,7 @@
 Use this bundle to generate rss feeds inside your Symfony application.
 
 
-&#10084; Big thank to Fabien Composiex https://github.com/eko/FeedBundle.
+&#10084; Big thanks to Fabien Composieux for giving me the inspiration to program this bundle. https://github.com/eko/FeedBundle.
 
 ## Installation
 `composer require markocupic/rss-feed-generator-bundle`
