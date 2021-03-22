@@ -76,30 +76,36 @@ services:
     public: true
 ```
 
-### Create feed 
+### Create the feed 
 ```php
 // Use the feed factory to generate the feed object
 $rss = $this->feedFactory->createFeed('utf-8');
 ```
+### Add feed Channel elements
+Use the Item class inside the feed factory method FeedFactory::addChannelField().
+
 The Item::_constructor() takes four arguments:
+
 1. (string) element name
 2. (string) content
 3. optional: (array) options (at the moment cdata, and filters)
 4. optional: (array) with attributes
+
 ```php
 $rss->addChannelField(
     new Item('title', 'Demo feed')
 );
 
+$rss->addChannelField(
+    new Item('link', 'https://foobar.ch')
+);
+```
+Make cdata elements and insert attributes:
+```php
 // Add CDATA element and an attribute
 $rss->addChannelField(
     new Item('description', 'Check our news feed and have fun!', ['cdata' => true], ['attrName' => 'Here comes the attribute value'])
 );
-
-$rss->addChannelField(
-    new Item('link', 'https://foobar.ch')
-);
-
 ```
 
 ### Filter od replace content
@@ -114,15 +120,15 @@ $rss->addChannelField(
 ```
 
 
-### Add items
-```php
-// Use factory to generate the feed object
-$rss = $this->feedFactory->createFeed('utf-8');
+### Add channel items
+Use FeedFactory::addChannelItemField(), ItemGroup() and Item() to generate channel items.
 
-$rss->addChannelField(
-    new Item('title', 'Demo feed')
-);
-// ...
+The ItemGroup::_constructor() takes three arguments:
+1. (string) element name
+2. (string) content
+3. optional: (array) with attributes
+```php
+
 
 // Retrieve data from database and add items
 $results = $this->getEvents($section);
@@ -147,10 +153,7 @@ if (null !== $results) {
 ```
 
 ### Nested items
-The ItemGroup::_constructor() takes three arguments:
-1. (string) element name
-2. (string) content
-3. optional: (array) with attributes
+
 ```php
 // Append nested items with ItemGroup.
 $rss->addChannelItemField(
