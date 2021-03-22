@@ -273,9 +273,9 @@ class FeedController extends AbstractController
 
 ## Filter & search and replace strings
 The extension will filter by default some characters. Linebreaks will be replaced with a whitespace, etc.
-Please have a look at the [Plugin Configuration](src/Resources/DependencyInjection/Configuration.php).
+Please have a look at the [Plugin Configuration](https://github.com/markocupic/rss-feed-generator-bundle/blob/main/src/DependencyInjection/Configuration.php#L30).
 
-Overriding these defaults is pretty easy and can be done in config/parameters.yml.
+Overriding these defaults is pretty easy and can be done in config/parameters.yml. 
 Please use regular expressions for the search patterns.
 
 ```xml
