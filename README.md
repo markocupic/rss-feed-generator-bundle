@@ -19,7 +19,9 @@ return [
     Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle::class => ['all' => true],
 ];
 ```
+
 **Option B:** In a **Contao** &#10084; environment register the rss feed generator bundle in the **Contao Manager Plugin** class of your bundle.
+
 ```php
 <?php
 
@@ -62,7 +64,7 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface, ConfigPlu
 
 Use dependency injection to require the feed factory in your controller.
 
-```yml
+```
 # src/Resources/config/services.yml
 services:
 
@@ -84,7 +86,7 @@ The Item::_constructor() takes four arguments:
 2. (string) content
 3. optional: (array) options (at the moment cdata, and filters)
 4. optional: (array) with attributes
-````php
+```php
 $rss->addChannelField(
     new Item('title', 'Demo feed')
 );
@@ -107,6 +109,7 @@ $arrFilter = ['Ferrari' => 'Italia', 'car' => 'country'] ;
 $rss->addChannelField(
     new Item('description', 'Ferrari is my favourite car!', ['filter' => $arrFilter])
 );
+// Will result in:
 // <description>Italia is my favourite country!</description>
 ```
 
