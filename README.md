@@ -156,7 +156,7 @@ Result:
 <item>
     <title>Title</title>
     <link>https://foo.bar</link>
-    <nestedItem>
+    <nestedItem foo="bar">
         <subitem>Some content</subitem>
         <subitem>Some content</subitem>
     </nestedItem>
@@ -220,7 +220,7 @@ class FeedController extends AbstractController
     private $projectDir;
 
     /**
-     * @Route("/_rssfeeds", name="rss_feed")
+     * @Route("/_rssfeed", name="rss_feed")
      */
     public function printLatestEvents(): Response
     {
@@ -289,7 +289,7 @@ markocupic_rss_feed_generator:
     '/\&shy;/': ''
     '/\[nbsp\]/': ' '
     '/&nbsp;/': ' '
-    'foo': 'bar'
+    '/foo/': 'bar' #Added
 
 ```
 
