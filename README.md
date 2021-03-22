@@ -84,7 +84,7 @@ $rss = $this->feedFactory->createFeed('utf-8');
 ### Add feed Channel elements
 Use the Item class inside the feed factory method FeedFactory::addChannelField().
 
-The Item::_constructor() takes four arguments:
+The Item::__constructor($elementName, $strValue, $arrOptions, $arrAttributes) takes four arguments:
 
 1. (string) element name
 2. (string) content
@@ -123,9 +123,9 @@ $rss->addChannelField(
 ### Add channel items
 Use FeedFactory::addChannelItemField(), ItemGroup() and Item() to generate channel items.
 
-The ItemGroup::_constructor() takes three arguments:
+The ItemGroup::__constructor($elementName, $arrItemObjects, $arrAttributes) takes three arguments:
 1. (string) element name
-2. (string) content
+2. (array) with Item objects
 3. optional: (array) with attributes
 ```php
 
