@@ -74,9 +74,9 @@ services:
     public: true
 ```
 
-### Create feed
+### Create feed 
 ```php
-// Use factory to generate the feed object
+// Use the feed factory to generate the feed object
 $rss = $this->feedFactory->createFeed('utf-8');
 
 $rss->addChannelField(
@@ -115,12 +115,12 @@ $rss->addChannelField(
 );
 // ...
 
-// Retrieve data from database and add Items
+// Retrieve data from database and add items
 $results = $this->getEvents($section);
 
 if (null !== $results) {
     while (false !== ($arrEvent = $results->fetch())) {
-        // Use ItemGroup to add a collection of items all of the same level.
+        // Use a new instance of ItemGroup to add a collection of items all of the same level.
         $rss->addChannelItemField(
             new ItemGroup('item', [
                 new Item('title', $arrEvent['title']),
@@ -139,7 +139,7 @@ if (null !== $results) {
 
 ### Nested items
 ```php
-// Apend nested items with ItemGroup.
+// Append nested items with ItemGroup.
 $rss->addChannelItemField(
     new ItemGroup('item', [
         new Item('title', 'Title'),
@@ -180,16 +180,6 @@ return $rss->render('web/share/myfeed.xml);
 <?php
 
 declare(strict_types=1);
-
-/*
- * This file is part of feed demo bundle.
- *
- * (c) Marko Cupic 2021 <m.cupic@gmx.ch>
- * @license MIT
- * For the full copyright and license information,
- * please view the LICENSE file that was distributed with this source code.
- * @link https://github.com/markocupic/rss-feed-generator-bundle
- */
 
 namespace Acme\DemoBundle\Controller\Feed;
 
@@ -250,7 +240,7 @@ class FeedController extends AbstractController
         // Retrieve data from db
         $results = $this->getEvents($section);
         
-        // Add some channe items
+        // Add some channel items
         if (null !== $results) {
             while (false !== ($arrEvent = $results->fetch())) {
                 $eventsModel = $calendarEventsModelAdapter->findByPk($arrEvent['id']);
