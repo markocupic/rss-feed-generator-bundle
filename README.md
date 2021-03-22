@@ -78,7 +78,13 @@ services:
 ```php
 // Use the feed factory to generate the feed object
 $rss = $this->feedFactory->createFeed('utf-8');
-
+```
+The Item::_constructor() takes four arguments:
+1. (string) element name
+2. (string) content
+3. optional: (array) options (at the moment cdata, and filters)
+4. optional: (array) with attributes
+````php
 $rss->addChannelField(
     new Item('title', 'Demo feed')
 );
@@ -138,6 +144,10 @@ if (null !== $results) {
 ```
 
 ### Nested items
+The ItemGroup::_constructor() takes three arguments:
+1. (string) element name
+2. (string) content
+3. optional: (array) with attributes
 ```php
 // Append nested items with ItemGroup.
 $rss->addChannelItemField(

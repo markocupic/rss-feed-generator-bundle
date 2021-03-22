@@ -23,7 +23,6 @@ class FeedFactory
 
     /**
      * FeedFactory constructor.
-     * @param Feed $feed
      */
     public function __construct(Feed $feed)
     {

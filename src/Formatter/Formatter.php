@@ -134,7 +134,7 @@ class Formatter
             }
 
             // Make cdata
-            if (null !== $strContent && is_string($strContent) && isset($arrOptions['cdata']) && $arrOptions['cdata']) {
+            if (null !== $strContent && \is_string($strContent) && \strlen($strContent) && isset($arrOptions['cdata']) && $arrOptions['cdata']) {
                 $elementCdata = $this->dom->createCDATASection($strContent);
                 $newElement->appendChild($elementCdata);
             } else {

@@ -38,10 +38,6 @@ class Item implements ItemInterface
 
     /**
      * Item constructor.
-     * @param string $name
-     * @param string $content
-     * @param array $arrOptions
-     * @param array $arrAttributes
      */
     public function __construct(string $name, string $content, array $arrOptions = [], array $arrAttributes = [])
     {

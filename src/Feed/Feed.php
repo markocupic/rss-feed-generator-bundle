@@ -35,10 +35,6 @@ class Feed
      */
     private $formatter;
 
-
-
-
-
     /**
      * @var array
      */
