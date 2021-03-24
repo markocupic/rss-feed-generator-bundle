@@ -55,11 +55,25 @@ class Formatter
         $this->dom->appendChild($comment);
 
         // Create element "rss"
-        $rss = $this->dom->appendChild($this->dom->createElement('rss'));
+        $rssEl = $this->dom->createElement('rss');
+
+        // Append attributes
+        $rssEl = $this->addAttributes($rssEl, $this->feed->getRootAttributes());
+
+        // Append element rss to DOM
+        $rss = $this->dom->appendChild($rssEl);
+
+        // Add version
         $rss->setAttribute('version', $this->feed->getVersion());
 
         // Create element "channel"
-        $channel = $rss->appendChild($this->dom->createElement('channel'));
+        $channelEl = $this->dom->createElement('channel');
+
+        // Append attributes
+        $channelEl = $this->addAttributes($channelEl, $this->feed->getChannelAttributes());
+
+        // Append channel to DOM
+        $channel = $rss->appendChild($channelEl);
 
         if ($this->feed->getFormatNicely()) {
             $this->dom->preserveWhiteSpace = false;
@@ -103,7 +117,7 @@ class Formatter
         switch ($className) {
             case Item::class:
                 return $this->appendItemField($objItem, $node);
-            break;
+                break;
 
             case ItemGroup::class:
                 return $this->appendItemGroupField($objItem, $node);
@@ -161,28 +175,27 @@ class Formatter
                 // Element is a single field
                 case Item::class:
                     $this->appendItemField($xmlSubElement, $newElement);
-                break;
+                    break;
 
                 // Element is a group item
                 case ItemGroup::class:
                     $this->appendItemGroupField($xmlSubElement, $newElement);
-                break;
+                    break;
             }
         }
 
         return $parentNode->appendChild($newElement);
     }
 
-    private function addAttributes(\DomElement $node, array $arrAttributes): array
+    private function addAttributes(\DomElement $node, array $arrAttributes): \DOMElement
     {
-        $elements = [];
-
         foreach ($arrAttributes as $attrName => $attrValue) {
-            $attribute = $this->dom->createAttribute($attrName);
-            $attribute->value = $attrValue;
-            $elements[] = $node->appendChild($attribute);
+            //$attribute = $this->dom->createAttribute($attrName);
+            //$attribute->value = $attrValue;
+            //$elements[] = $node->appendChild($attribute);
+            $node->setAttribute($attrName, $attrValue);
         }
 
-        return $elements;
+        return $node;
     }
 }

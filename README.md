@@ -80,6 +80,17 @@ services:
 ```php
 // Use the feed factory to generate the feed object
 $rss = $this->feedFactory->createFeed('utf-8');
+
+ // Add one or more attributes to the root element
+$rss->setRootAttributes([
+    'xmlns:tourdb' => 'https://acme.com/schema/tourdbrss/1.0',
+    'xmlns:atom'=>'http://www.w3.org/2005/Atom',
+]);
+
+// Add one or more attributes to the channel element
+$rss->setChannelAttributes([
+    'foo' => 'bar',
+]);
 ```
 ### Add feed Channel elements
 Use the Item class inside the feed factory method FeedFactory::addChannelField().

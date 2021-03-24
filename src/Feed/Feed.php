@@ -38,6 +38,16 @@ class Feed
     /**
      * @var array
      */
+    private $arrRootAttributes = [];
+
+    /**
+     * @var array
+     */
+    private $arrChannelAttributes = [];
+
+    /**
+     * @var array
+     */
     private $channelFields = [];
 
     /**
@@ -71,6 +81,26 @@ class Feed
         return $this;
     }
 
+    public function getRootAttributes(): array
+    {
+        return $this->arrRootAttributes;
+    }
+
+    public function getChannelAttributes(): array
+    {
+        return $this->arrChannelAttributes;
+    }
+
+    public function setRootAttributes(array $arrAttributes): void
+    {
+        $this->arrRootAttributes = $arrAttributes;
+    }
+
+    public function setChannelAttributes(array $arrAttributes): void
+    {
+        $this->arrChannelAttributes = $arrAttributes;
+    }
+
     public function getVersion(): string
     {
         return $this->version;
@@ -81,9 +111,11 @@ class Feed
         return $this->formatNicely;
     }
 
-    public function getEncoding(): string
+    public function doFormatNicely(bool $bool): self
     {
-        return $this->encoding;
+        $this->formatNicely = $bool;
+
+        return $this;
     }
 
     public function getChannelFields(): array
@@ -94,20 +126,6 @@ class Feed
     public function getChannelItemFields(): array
     {
         return $this->channelItemFields;
-    }
-
-    public function setEncoding(string $strEncoding): self
-    {
-        $this->encoding = $strEncoding;
-
-        return $this;
-    }
-
-    public function setFormatNicely(bool $bool): self
-    {
-        $this->formatNicely = $bool;
-
-        return $this;
     }
 
     public function addChannelField(ItemInterface $objItem): self
@@ -146,6 +164,18 @@ class Feed
         $response->headers->set('Content-Type', sprintf('application/rss+xml; charset=%s%s', $this->getEncoding(), $strFilename));
 
         return $response;
+    }
+
+    public function getEncoding(): string
+    {
+        return $this->encoding;
+    }
+
+    public function setEncoding(string $strEncoding): self
+    {
+        $this->encoding = $strEncoding;
+
+        return $this;
     }
 
     /**
