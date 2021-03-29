@@ -299,14 +299,15 @@ Please use regular expressions for the search patterns.
 # config/parameters.yml
 markocupic_rss_feed_generator:
   filter:
-    # '/[\n\r]+/': ' ' Disabled
+    '/</': '&lt;'
+    '/[\n\r]+/': ' '
     '/&#40;/': '('
     '/&#41;/': ')'
     '/\[-\]/': ''
     '/\&shy;/': ''
     '/\[nbsp\]/': ' '
     '/&nbsp;/': ' '
-    '/foo/': 'bar' #Added
+    '/&/': '&amp;'
 
 ```
 

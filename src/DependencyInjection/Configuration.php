@@ -31,6 +31,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->end()
                     ->useAttributeAsKey('name')
                     ->defaultValue([
+                        '/</' => '&lt;',
                         '/[\n\r]+/' => ' ',
                         '/&#40;/' => '(',
                         '/&#41;/' => ')',
@@ -38,9 +39,9 @@ class Configuration implements ConfigurationInterface
                         '/\&shy;/' => '',
                         '/\[nbsp\]/' => ' ',
                         '/&nbsp;/' => ' ',
+                        '/&/' => '&amp;',
                     ])
-                ->end()
-        ;
+                ->end();
 
         return $treeBuilder;
     }
