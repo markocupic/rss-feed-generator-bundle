@@ -32,16 +32,13 @@ class Configuration implements ConfigurationInterface
                     ->useAttributeAsKey('name')
                     ->defaultValue([
                         '/</' => '&lt;',
-                        '/[\n\r]+/' => ' ',
-                        '/&#40;/' => '(',
-                        '/&#41;/' => ')',
                         '/\[-\]/' => '',
                         '/\&shy;/' => '',
                         '/\[nbsp\]/' => ' ',
                         '/&nbsp;/' => ' ',
-                        '/&/' => '&amp;',
                     ])
-                ->end();
+                ->end()
+        ;
 
         return $treeBuilder;
     }
