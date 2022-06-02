@@ -1,7 +1,5 @@
 services:
 
-  Markocupic\RssFeedGeneratorBundle\Feed\FeedItem: ~
-
   Markocupic\RssFeedGeneratorBundle\Formatter\Formatter:
     arguments:
       - '%markocupic_rss_feed_generator.filter%'
