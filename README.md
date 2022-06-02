@@ -79,7 +79,7 @@ services:
 ### Create the feed 
 ```php
 // Use the feed factory to generate the feed object
-$rss = $this->feedFactory->createFeed('utf-8');
+$rss = $this->feedFactory->createFeed(\Markocupic\RssFeedGeneratorBundle\Feed\Feed::ENCODING_UTF8);
 
  // Add one or more attributes to the root element
 $rss->setRootAttributes([

@@ -7,4 +7,5 @@ cd..
 cd..
 cd..
 vendor\bin\ecs check vendor/markocupic/rss-feed-generator-bundle/src --fix --config vendor/markocupic/rss-feed-generator-bundle/.ecs/config/default.php
+
 cd vendor/markocupic/rss-feed-generator-bundle/.ecs./batch/fix

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * This file is part of RSS Feed Generator Bundle.
  *
  * (c) Marko Cupic 2022 <m.cupic@gmx.ch>
- * @license GPL-3.0-or-later
+ * @license MIT
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed with this source code.
  * @link https://github.com/markocupic/rss-feed-generator-bundle
@@ -20,65 +20,23 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Feed
 {
-    /**
-     * @var \DOMDocument
-     */
-    public $xml;
+    public const ENCODING_UTF8 = 'utf-8';
 
-    /**
-     * @var string
-     */
-    private $version;
+    public \DOMDocument $xml;
+    private Formatter $formatter;
+    private string $version;
+    private array $arrRootAttributes = [];
+    private array $arrChannelAttributes = [];
+    private array $channelFields = [];
+    private array $channelItemFields = [];
+    private string $encoding;
+    private bool $formatNicely = true;
 
-    /**
-     * @var Formatter
-     */
-    private $formatter;
-
-    /**
-     * @var array
-     */
-    private $arrRootAttributes = [];
-
-    /**
-     * @var array
-     */
-    private $arrChannelAttributes = [];
-
-    /**
-     * @var array
-     */
-    private $channelFields = [];
-
-    /**
-     * @var array
-     */
-    private $channelItemFields = [];
-
-    /**
-     * @var string
-     */
-    private $encoding;
-
-    /**
-     * @var bool
-     */
-    private $formatNicely = true;
-
-    public function __construct(Formatter $formatter)
+    public function __construct(Formatter $formatter, string $encoding)
     {
         $this->formatter = $formatter;
-    }
-
-    /**
-     * @return $this
-     */
-    public function create(): self
-    {
-        $this->encoding = 'utf-8';
+        $this->encoding = $encoding;
         $this->version = '2.0';
-
-        return $this;
     }
 
     public function getRootAttributes(): array
@@ -143,7 +101,7 @@ class Feed
     }
 
     /**
-     * if param $path is set, the extension will try to save
+     * If param $path is set, the extension will try to save
      * the output in the filesystem.
      */
     public function render(string $path = ''): Response

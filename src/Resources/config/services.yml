@@ -1,9 +1,5 @@
 services:
 
-  Markocupic\RssFeedGeneratorBundle\Feed\Feed:
-    arguments:
-      - '@Markocupic\RssFeedGeneratorBundle\Formatter\Formatter'
-
   Markocupic\RssFeedGeneratorBundle\Feed\FeedItem: ~
 
   Markocupic\RssFeedGeneratorBundle\Formatter\Formatter:
@@ -12,7 +8,7 @@ services:
 
   Markocupic\RssFeedGeneratorBundle\Feed\FeedFactory:
     arguments:
-      - '@Markocupic\RssFeedGeneratorBundle\Feed\Feed'
+      - '@Markocupic\RssFeedGeneratorBundle\Formatter\Formatter'
 
 
 
