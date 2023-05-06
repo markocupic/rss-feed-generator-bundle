@@ -40,10 +40,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Markocupic\RssFeedGeneratorBundle\MarkocupicRssFeedGeneratorBundle;
 use Acme\MyBundle\AcmeMyBundleBundle;
 
-/**
- * Class Plugin
- * Plugin for the Contao Manager.
- */
 class Plugin implements BundlePluginInterface, RoutingPluginInterface, ConfigPluginInterface
 {
     /**
@@ -65,7 +61,7 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface, ConfigPlu
 Use dependency injection to require the feed factory in your controller.
 
 ```
-# src/Resources/config/services.yml
+# config/services.yml
 services:
 
   Markocupic\DemoBundle\Controller\Feed\FeedController:
