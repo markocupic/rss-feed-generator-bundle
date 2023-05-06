@@ -1,40 +1,35 @@
 {
-  "name": "markocupic/rss-feed-generator-bundle",
-  "description": "Simple RSS feed generator. Generate RSS feeds inside a symfony controller.",
-  "keywords": [
-    "RSS",
-    "feed",
-    "symfony"
-  ],
-  "type": "symfony-bundle",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Marko Cupic",
-      "email": "m.cupic@gmx.ch",
-      "homepage": "https://github.com/markocupic",
-      "role": "Developer"
+    "name": "markocupic/rss-feed-generator-bundle",
+    "description": "Simple RSS feed generator. Generate RSS feeds inside a symfony controller.",
+    "keywords": [
+        "RSS",
+        "feed",
+        "symfony"
+    ],
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marko Cupic",
+            "email": "m.cupic@gmx.ch",
+            "homepage": "https://github.com/markocupic",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/markocupic/rss-feed-generator-bundle/issues",
+        "source": "https://github.com/markocupic/rss-feed-generator-bundle"
+    },
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "symfony/framework-bundle": "^4.4 || ^5.2 || ^6.0"
+    },
+    "require-dev": {
+        "symplify/easy-coding-standard": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Markocupic\\RssFeedGeneratorBundle\\": "src/"
+        }
     }
-  ],
-  "support": {
-    "issues": "https://github.com/markocupic/rss-feed-generator-bundle/issues",
-    "source": "https://github.com/markocupic/rss-feed-generator-bundle"
-  },
-  "require": {
-    "php": "^7.4 || ^8.0",
-    "symfony/framework-bundle": "^4.4|^5.2"
-  },
-  "require-dev": {
-    "contao/easy-coding-standard": "^5.0",
-    "contao/manager-bundle": "^4.13",
-    "contao/manager-plugin": "^2.3.1",
-    "contao/test-case": "^4.6",
-    "phpunit/phpunit": "^9.3",
-    "symfony/phpunit-bridge": "^5.4"
-  },
-  "autoload": {
-    "psr-4": {
-      "Markocupic\\RssFeedGeneratorBundle\\": "src/"
-    }
-  }
 }

@@ -1,4 +1,4 @@
-<img src="./src/Resources/public/logo.png" width="300">
+<img src="./docs/logo.png" width="300">
 
 # RSS Feed Generator Bundle
 Use this bundle to generate rss feeds inside your Symfony application.
@@ -76,7 +76,7 @@ services:
     public: true
 ```
 
-### Create the feed 
+### Create the feed
 ```php
 // Use the feed factory to generate the feed object
 $rss = $this->feedFactory->createFeed(\Markocupic\RssFeedGeneratorBundle\Feed\Feed::ENCODING_UTF8);
@@ -266,7 +266,7 @@ class FeedController extends AbstractController
 
         // Retrieve data from db
         $results = $this->getEvents($section);
-        
+
         // Add some channel items
         if (null !== $results) {
             while (false !== ($arrEvent = $results->fetch())) {
@@ -292,7 +292,7 @@ class FeedController extends AbstractController
 The extension will filter by default some characters. Linebreaks will be replaced with a whitespace, etc.
 Please have a look at the [Plugin Configuration](https://github.com/markocupic/rss-feed-generator-bundle/blob/main/src/DependencyInjection/Configuration.php#L30).
 
-Overriding these defaults is pretty easy and can be done in config/parameters.yml. 
+Overriding these defaults is pretty easy and can be done in config/parameters.yml.
 Please use regular expressions for the search patterns.
 
 ```xml

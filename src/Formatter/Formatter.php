@@ -5,7 +5,7 @@ declare(strict_types=1);
 /*
  * This file is part of RSS Feed Generator Bundle.
  *
- * (c) Marko Cupic 2022 <m.cupic@gmx.ch>
+ * (c) Marko Cupic 2023 <m.cupic@gmx.ch>
  * @license MIT
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed with this source code.
@@ -112,7 +112,7 @@ class Formatter
         }
     }
 
-    private function appendElementIntoNode(ItemInterface $objItem, \DomElement $node)
+    private function appendElementIntoNode(ItemInterface $objItem, \DOMElement $node)
     {
         $className = \get_class($objItem);
 
@@ -189,7 +189,7 @@ class Formatter
         return $parentNode->appendChild($newElement);
     }
 
-    private function addAttributes(\DomElement $node, array $arrAttributes): \DOMElement
+    private function addAttributes(\DOMElement $node, array $arrAttributes): \DOMElement
     {
         foreach ($arrAttributes as $attrName => $attrValue) {
             //$attribute = $this->dom->createAttribute($attrName);
