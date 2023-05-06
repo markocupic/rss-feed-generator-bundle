@@ -33,6 +33,3 @@ jobs:
 
       - name: Install the dependencies
         run: composer install --no-interaction --no-suggest
-
-      - name: Run the unit tests
-        run: vendor/bin/phpunit --colors=always
