@@ -193,7 +193,7 @@ return $rss->render();
 
 ### Render and save content to the filesystem.
 ```php
-return $rss->render('web/share/myfeed.xml);
+return $rss->render('public/share/myfeed.xml);
 ```
 
 
@@ -279,7 +279,7 @@ class FeedController extends AbstractController
             }
         }
 
-        return $rss->render($this->projectDir.'/web/share/rss.xml');
+        return $rss->render($this->projectDir.'/public/share/rss.xml');
     }
 }
 ```
