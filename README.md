@@ -6,6 +6,10 @@ Use this bundle to generate rss feeds inside your Symfony application.
 
 &#10084; Many thanks to @eko (Vincent Composieux) for giving me the inspiration to program this bundle. https://github.com/eko/FeedBundle.
 
+## Requirements
+- PHP ^8.3
+- Symfony ^6.4 || ^7.0 || ^8.0
+
 ## Installation
 `composer require markocupic/rss-feed-generator-bundle`
 
@@ -45,32 +49,19 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface, ConfigPlu
     /**
      * {@inheritdoc}
      */
-    public function getBundles(ParserInterface $parser)
+    public function getBundles(ParserInterface $parser): array
     {
         return [
             // Register RSS feed generator bundle
             BundleConfig::create(MarkocupicRssFeedGeneratorBundle::class),
             // register other bundles
             BundleConfig::create(AcmeMyBundle::class)
-            ->setLoadAfter(MarkocupicRssFeedGeneratorBundle::class)
-            ->setLoadAfter(ContaoCoreBundle::class)
+                ->setLoadAfter([MarkocupicRssFeedGeneratorBundle::class, ContaoCoreBundle::class]),
         ];
     }
 ```
 
-Use dependency injection to require the feed factory in your controller.
-
-```
-# config/services.yml
-services:
-
-  Markocupic\DemoBundle\Controller\Feed\FeedController:
-    arguments:
-      - '@Markocupic\RssFeedGeneratorBundle\Feed\FeedFactory'
-      - '@database_connection'
-      - '%kernel.project_dir%'
-    public: true
-```
+Use dependency injection (autowiring) to require the feed factory in your controller.
 
 ### Create the feed
 ```php
@@ -115,10 +106,10 @@ $rss->addChannelField(
 );
 ```
 
-### Filter od replace content
+### Filter or replace content
 ```php
-// filter or replace values
-$arrFilter = ['Ferrari' => 'Italia', 'car' => 'country'] ;
+// filter or replace values (regular expressions)
+$arrFilter = ['/Ferrari/' => 'Italia', '/car/' => 'country'];
 $rss->addChannelField(
     new Item('description', 'Ferrari is my favourite car!', ['filter' => $arrFilter])
 );
@@ -138,24 +129,20 @@ The ItemGroup::__constructor($elementName, $arrItemObjects, $arrAttributes) take
 
 
 // Retrieve data from database and add items
-$results = $this->getEvents($section);
-
-if (null !== $results) {
-    while (false !== ($arrEvent = $results->fetch())) {
-        // Use a new instance of ItemGroup to add a collection of items all of the same level.
-        $rss->addChannelItemField(
-            new ItemGroup('item', [
-                new Item('title', $arrEvent['title']),
-                new Item('link', $arrEvent['link']),
-                new Item('description', $arrEvent['description'], ['cdata' => true]),
-                new Item('pubDate', date('r',(int) $arrEvent['tstamp'])),
-                new Item('author', $arrEvent['author']),
-                new Item('guid', $arrEvent['uuid']),
-                new Item('tourdb:startdate', date('Y-m-d', (int) $arrEvent['startDate'])),
-                new Item('tourdb:enddate', date('Y-m-d', (int) $arrEvent['endDate'])),
-            ])
-        );
-    }
+foreach ($this->getEvents() as $arrEvent) {
+    // Use a new instance of ItemGroup to add a collection of items all of the same level.
+    $rss->addChannelItemField(
+        new ItemGroup('item', [
+            new Item('title', $arrEvent['title']),
+            new Item('link', $arrEvent['link']),
+            new Item('description', $arrEvent['description'], ['cdata' => true]),
+            new Item('pubDate', date('r', (int) $arrEvent['tstamp'])),
+            new Item('author', $arrEvent['author']),
+            new Item('guid', $arrEvent['uuid']),
+            new Item('tourdb:startdate', date('Y-m-d', (int) $arrEvent['startDate'])),
+            new Item('tourdb:enddate', date('Y-m-d', (int) $arrEvent['endDate'])),
+        ])
+    );
 }
 ```
 
@@ -193,7 +180,7 @@ return $rss->render();
 
 ### Render and save content to the filesystem.
 ```php
-return $rss->render('public/share/myfeed.xml);
+return $rss->render('public/share/myfeed.xml');
 ```
 
 
@@ -207,76 +194,46 @@ declare(strict_types=1);
 namespace Acme\DemoBundle\Controller\Feed;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Query\QueryBuilder;
+use Markocupic\RssFeedGeneratorBundle\Feed\Feed;
 use Markocupic\RssFeedGeneratorBundle\Feed\FeedFactory;
 use Markocupic\RssFeedGeneratorBundle\Item\Item;
-use Markocupic\RssFeedGeneratorBundle\Feed\ItemGroup;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Markocupic\RssFeedGeneratorBundle\Item\ItemGroup;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-class FeedController extends AbstractController
+#[Route('/_rssfeed', name: 'rss_feed')]
+class FeedController
 {
-    /**
-     * @var FeedFactory
-     */
-    private $feedFactory;
+    public function __construct(
+        private readonly FeedFactory $feedFactory,
+        private readonly Connection $connection,
+        #[Autowire('%kernel.project_dir%')]
+        private readonly string $projectDir,
+    ) {
+    }
 
-    /**
-     * @var Connection
-     */
-    private $connection;
-
-    /**
-     * @var string
-     */
-    private $projectDir;
-
-    /**
-     * @Route("/_rssfeed", name="rss_feed")
-     */
-    public function printLatestEvents(): Response
+    public function __invoke(): Response
     {
+        $rss = $this->feedFactory->createFeed(Feed::ENCODING_UTF8);
 
-        $rss = $this->feedFactory->createFeed('utf-8');
+        $rss->addChannelField(new Item('title', 'Acme news'));
+        $rss->addChannelField(new Item('description', 'Enjoy our news.'));
+        $rss->addChannelField(new Item('link', 'https://acme.com'));
+        $rss->addChannelField(new Item('language', 'de'));
+        $rss->addChannelField(new Item('pubDate', date('r', time() - 3600)));
 
-        $rss->addChannelField(
-            new Item('title', 'Acme news')
-        );
+        // Retrieve data from the database and add some channel items
+        $events = $this->connection->fetchAllAssociative('SELECT * FROM tl_calendar_events WHERE published = 1 ORDER BY startDate DESC');
 
-        $rss->addChannelField(
-            new Item('description', 'Enjoj our news.')
-        );
-
-        $rss->addChannelField(
-            new Item('link', 'https://acme.com')
-        );
-
-        $rss->addChannelField(
-            new Item('language', 'de')
-        );
-
-        $rss->addChannelField(
-            new Item('pubDate', date('r', (time() - 3600)))
-        );
-
-        // Retrieve data from db
-        $results = $this->getEvents($section);
-
-        // Add some channel items
-        if (null !== $results) {
-            while (false !== ($arrEvent = $results->fetch())) {
-                $eventsModel = $calendarEventsModelAdapter->findByPk($arrEvent['id']);
-
-                $rss->addChannelItemField(
-                    new ItemGroup('item', [
-                        new Item('title', $arrEvent['title']),
-                        new Item('link', $arrEvent['link']),
-                        new Item('description', $arrEvent['description'], ['cdata' => true]),
-                        new Item('pubDate', date('r', (int) $eventsModel->tstamp)),
-                    ])
-                );
-            }
+        foreach ($events as $arrEvent) {
+            $rss->addChannelItemField(
+                new ItemGroup('item', [
+                    new Item('title', $arrEvent['title']),
+                    new Item('description', (string) $arrEvent['teaser'], ['cdata' => true]),
+                    new Item('pubDate', date('r', (int) $arrEvent['tstamp'])),
+                ])
+            );
         }
 
         return $rss->render($this->projectDir.'/public/share/rss.xml');
@@ -288,11 +245,11 @@ class FeedController extends AbstractController
 The extension will filter by default some characters. Linebreaks will be replaced with a whitespace, etc.
 Please have a look at the [Plugin Configuration](https://github.com/markocupic/rss-feed-generator-bundle/blob/main/src/DependencyInjection/Configuration.php#L30).
 
-Overriding these defaults is pretty easy and can be done in config/parameters.yml.
+Overriding these defaults is pretty easy and can be done in config/config.yaml.
 Please use regular expressions for the search patterns.
 
-```xml
-# config/parameters.yml
+```yaml
+# config/config.yaml
 markocupic_rss_feed_generator:
   filter:
     '/</': '&lt;'

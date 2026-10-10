@@ -16,27 +16,35 @@ namespace Markocupic\RssFeedGeneratorBundle\Feed;
 
 use Markocupic\RssFeedGeneratorBundle\Formatter\Formatter;
 use Markocupic\RssFeedGeneratorBundle\Item\ItemInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
 
 class Feed
 {
     public const ENCODING_UTF8 = 'utf-8';
 
-    public \DOMDocument $xml;
-    private Formatter $formatter;
-    private string $version;
+    private string $version = '2.0';
+
     private array $arrRootAttributes = [];
+
     private array $arrChannelAttributes = [];
+
+    /**
+     * @var array<ItemInterface>
+     */
     private array $channelFields = [];
+
+    /**
+     * @var array<ItemInterface>
+     */
     private array $channelItemFields = [];
-    private string $encoding;
+
     private bool $formatNicely = true;
 
-    public function __construct(Formatter $formatter, string $encoding)
-    {
-        $this->formatter = $formatter;
-        $this->encoding = $encoding;
-        $this->version = '2.0';
+    public function __construct(
+        private readonly Formatter $formatter,
+        private string $encoding = self::ENCODING_UTF8,
+    ) {
     }
 
     public function getRootAttributes(): array
@@ -76,11 +84,17 @@ class Feed
         return $this;
     }
 
+    /**
+     * @return array<ItemInterface>
+     */
     public function getChannelFields(): array
     {
         return $this->channelFields;
     }
 
+    /**
+     * @return array<ItemInterface>
+     */
     public function getChannelItemFields(): array
     {
         return $this->channelItemFields;
@@ -101,25 +115,22 @@ class Feed
     }
 
     /**
-     * If param $path is set, the extension will try to save
-     * the output in the filesystem.
+     * Renders the feed. If $path is set, the output will also be saved to the
+     * filesystem (missing directories are created).
      */
     public function render(string $path = ''): Response
     {
-        $strBuffer = $this->formatter->render($this, $path);
+        $strBuffer = $this->formatter->render($this);
 
-        if (\strlen($path)) {
-            $this->writeFileToFilesystem(
-                $path,
-                $strBuffer
-            );
+        if ('' !== $path) {
+            (new Filesystem())->dumpFile($path, $strBuffer);
         }
 
         $response = new Response($strBuffer);
         $response->setCharset($this->getEncoding());
 
-        $strFilename = \strlen((string) $path) ? '; filename='.basename($path) : '';
-        $response->headers->set('Content-Type', sprintf('application/rss+xml; charset=%s%s', $this->getEncoding(), $strFilename));
+        $strFilename = '' !== $path ? '; filename='.basename($path) : '';
+        $response->headers->set('Content-Type', \sprintf('application/rss+xml; charset=%s%s', $this->getEncoding(), $strFilename));
 
         return $response;
     }
@@ -134,13 +145,5 @@ class Feed
         $this->encoding = $strEncoding;
 
         return $this;
-    }
-
-    /**
-     * @return false|int
-     */
-    private function writeFileToFilesystem(string $path, string $content)
-    {
-        return file_put_contents($path, $content);
     }
 }

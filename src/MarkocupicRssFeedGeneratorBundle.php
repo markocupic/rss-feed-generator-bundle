@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace Markocupic\RssFeedGeneratorBundle;
 
 use Markocupic\RssFeedGeneratorBundle\DependencyInjection\MarkocupicRssFeedGeneratorExtension;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class MarkocupicRssFeedGeneratorBundle extends Bundle
@@ -28,13 +27,5 @@ class MarkocupicRssFeedGeneratorBundle extends Bundle
     public function getContainerExtension(): MarkocupicRssFeedGeneratorExtension
     {
         return new MarkocupicRssFeedGeneratorExtension();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function build(ContainerBuilder $container): void
-    {
-        parent::build($container);
     }
 }

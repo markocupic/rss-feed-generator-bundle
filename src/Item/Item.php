@@ -16,17 +16,18 @@ namespace Markocupic\RssFeedGeneratorBundle\Item;
 
 class Item implements ItemInterface
 {
-    private string $name;
-    private string $content;
-    private array $arrOptions = [];
-    private array $arrAttributes = [];
-
-    public function __construct(string $name, string $content, array $arrOptions = [], array $arrAttributes = [])
-    {
-        $this->name = $name;
-        $this->content = $content;
-        $this->arrOptions = $arrOptions;
-        $this->arrAttributes = $arrAttributes;
+    /**
+     * @param string $name          The element name
+     * @param string $content       The element content
+     * @param array  $arrOptions    Options: "cdata" (bool) and "filter" (array, search => replace regular expressions)
+     * @param array  $arrAttributes Attributes of the element
+     */
+    public function __construct(
+        private readonly string $name,
+        private readonly string $content,
+        private readonly array $arrOptions = [],
+        private readonly array $arrAttributes = [],
+    ) {
     }
 
     public function getName(): string

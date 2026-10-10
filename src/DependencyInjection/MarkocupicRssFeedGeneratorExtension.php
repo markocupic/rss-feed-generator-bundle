@@ -21,9 +21,6 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class MarkocupicRssFeedGeneratorExtension extends Extension
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getAlias(): string
     {
         return Configuration::ROOT_KEY;
@@ -34,19 +31,11 @@ class MarkocupicRssFeedGeneratorExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $configuration = new Configuration();
+        $config = $this->processConfiguration(new Configuration(), $configs);
 
-        $config = $this->processConfiguration($configuration, $configs);
-
-        $loader = new YamlFileLoader(
-            $container,
-            new FileLocator(__DIR__.'/../../config')
-        );
-
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../../config'));
         $loader->load('services.yaml');
 
-        $rootKey = $this->getAlias();
-
-        $container->setParameter($rootKey.'.filter', $config['filter']);
+        $container->setParameter($this->getAlias().'.filter', $config['filter']);
     }
 }

@@ -16,29 +16,28 @@ namespace Markocupic\RssFeedGeneratorBundle\Item;
 
 class ItemGroup implements ItemInterface
 {
-    private string $name;
-    private array $itemFields = [];
-    private array $arrAttributes = [];
+    /**
+     * @var array<ItemInterface>
+     */
+    private readonly array $itemFields;
 
     /**
-     * ItemGroup constructor.
-     *
-     * @param array|ItemInterface $itemFields
+     * @param array<ItemInterface>|ItemInterface $itemFields
      */
-    public function __construct(string $name, $itemFields, array $arrAttributes = [])
-    {
-        $this->name = $name;
+    public function __construct(
+        private readonly string $name,
+        ItemInterface|array $itemFields,
+        private readonly array $arrAttributes = [],
+    ) {
+        $itemFields = \is_array($itemFields) ? $itemFields : [$itemFields];
 
-        if (!\is_array($itemFields) && !$itemFields instanceof ItemInterface) {
-            throw new \RuntimeException('ItemGroup second argument shouls be an array or a singele ItemField instance.');
+        foreach ($itemFields as $itemField) {
+            if (!$itemField instanceof ItemInterface) {
+                throw new \InvalidArgumentException(\sprintf('The second argument of %s() must be an instance of %s or an array of %s instances.', __METHOD__, ItemInterface::class, ItemInterface::class));
+            }
         }
 
-        if (!\is_array($itemFields)) {
-            $itemFields = [$itemFields];
-        }
-
-        $this->itemFields = $itemFields;
-        $this->arrAttributes = $arrAttributes;
+        $this->itemFields = array_values($itemFields);
     }
 
     public function getName(): string
@@ -51,6 +50,9 @@ class ItemGroup implements ItemInterface
         return $this->arrAttributes;
     }
 
+    /**
+     * @return array<ItemInterface>
+     */
     public function getChannelItemFields(): array
     {
         return $this->itemFields;

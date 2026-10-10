@@ -21,61 +21,20 @@ use Markocupic\RssFeedGeneratorBundle\Item\ItemInterface;
 
 class Formatter
 {
-    /**
-     * @var array
-     */
-    private $arrFilter;
+    private \DOMDocument $dom;
 
     /**
-     * @var Feed
+     * @param array<string, string> $arrFilter Regular expressions (search => replace)
      */
-    private $feed;
-
-    /**
-     * @var \DOMDocument
-     */
-    private $dom;
-
-    /**
-     * Formatter constructor.
-     */
-    public function __construct(array $arrFilter)
+    public function __construct(private readonly array $arrFilter = [])
     {
-        $this->arrFilter = $arrFilter;
     }
 
     public function render(Feed $feed): string
     {
-        $this->feed = $feed;
+        $this->dom = new \DOMDocument('1.0', $feed->getEncoding());
 
-        $this->dom = new \DOMDocument('1.0', $this->feed->getEncoding());
-
-        // Add comment
-        $comment = $this->dom->createComment('Generated with markocupic/rss-feed-generator-bundle. See https://github.com/markocupic/rss-feed-generator-bundle');
-        $this->dom->appendChild($comment);
-
-        // Create element "rss"
-        $rssEl = $this->dom->createElement('rss');
-
-        // Append attributes
-        $rssEl = $this->addAttributes($rssEl, $this->feed->getRootAttributes());
-
-        // Append element rss to DOM
-        $rss = $this->dom->appendChild($rssEl);
-
-        // Add version
-        $rss->setAttribute('version', $this->feed->getVersion());
-
-        // Create element "channel"
-        $channelEl = $this->dom->createElement('channel');
-
-        // Append attributes
-        $channelEl = $this->addAttributes($channelEl, $this->feed->getChannelAttributes());
-
-        // Append channel to DOM
-        $channel = $rss->appendChild($channelEl);
-
-        if ($this->feed->getFormatNicely()) {
+        if ($feed->getFormatNicely()) {
             $this->dom->preserveWhiteSpace = false;
             $this->dom->formatOutput = true;
         } else {
@@ -83,119 +42,107 @@ class Formatter
             $this->dom->formatOutput = false;
         }
 
-        // Add channel elements
-        $arrChannelElements = $this->feed->getChannelFields();
+        // Add comment
+        $this->dom->appendChild($this->dom->createComment('Generated with markocupic/rss-feed-generator-bundle. See https://github.com/markocupic/rss-feed-generator-bundle'));
 
-        /** @var \ItemInterface $objItem */
-        foreach ($arrChannelElements as $objItem) {
+        // Create the "rss" root element
+        $rss = $this->addAttributes($this->dom->createElement('rss'), $feed->getRootAttributes());
+        $rss->setAttribute('version', $feed->getVersion());
+        $this->dom->appendChild($rss);
+
+        // Create the "channel" element
+        $channel = $this->addAttributes($this->dom->createElement('channel'), $feed->getChannelAttributes());
+        $rss->appendChild($channel);
+
+        // Add channel elements
+        foreach ($feed->getChannelFields() as $objItem) {
             $this->appendElementIntoNode($objItem, $channel);
         }
 
         // Add channel items
-        foreach ($this->feed->getChannelItemFields() as $item) {
+        foreach ($feed->getChannelItemFields() as $item) {
             $this->addChannelItem($channel, $item);
         }
 
-        return $this->dom->saveXML();
+        return (string) $this->dom->saveXML();
     }
 
-    private function addChannelItem(\DOMElement $channel, ItemInterface $objItemGroup): void
+    private function addChannelItem(\DOMElement $channel, ItemInterface $objItem): void
     {
-        $node = $this->dom->createElement('item');
-        $node = $channel->appendChild($node);
-        $itemElements = $objItemGroup->getChannelItemFields();
+        // A single item (e.g. new Item('item', ...)) is appended as it is
+        if (!$objItem instanceof ItemGroup) {
+            $this->appendElementIntoNode($objItem, $channel);
 
-        foreach ($itemElements as $element) {
-            if ($element) {
+            return;
+        }
+
+        $node = $this->dom->createElement('item');
+        $channel->appendChild($node);
+
+        foreach ($objItem->getChannelItemFields() as $element) {
+            if ($element instanceof ItemInterface) {
                 $this->appendElementIntoNode($element, $node);
             }
         }
     }
 
-    private function appendElementIntoNode(ItemInterface $objItem, \DOMElement $node)
+    private function appendElementIntoNode(ItemInterface $objItem, \DOMElement $node): \DOMElement|null
     {
-        $className = \get_class($objItem);
-
-        switch ($className) {
-            case Item::class:
-                return $this->appendItemField($objItem, $node);
-                break;
-
-            case ItemGroup::class:
-                return $this->appendItemGroupField($objItem, $node);
-                break;
-        }
+        return match (true) {
+            $objItem instanceof Item => $this->appendItemField($objItem, $node),
+            $objItem instanceof ItemGroup => $this->appendItemGroupField($objItem, $node),
+            default => null,
+        };
     }
 
     private function appendItemField(Item $objItem, \DOMElement $parentNode): \DOMElement
     {
         $arrOptions = $objItem->getOptions();
-        $newElement = $this->dom->createElement($objItem->getName());
 
-        // Add attributes
-        $this->addAttributes($newElement, $objItem->getAttributes());
+        $newElement = $this->addAttributes($this->dom->createElement($objItem->getName()), $objItem->getAttributes());
 
-        if ($objItem->getContent()) {
-            $strContent = $objItem->getContent();
+        $strContent = (string) $objItem->getContent();
 
+        if ('' !== $strContent) {
             // Filter
-            $arrFilter = $this->arrFilter;
-
-            if (isset($arrOptions['filter']) && \is_array($arrOptions['filter'])) {
-                $arrFilter = $arrOptions['filter'];
-            }
+            $arrFilter = isset($arrOptions['filter']) && \is_array($arrOptions['filter']) ? $arrOptions['filter'] : $this->arrFilter;
 
             foreach ($arrFilter as $search => $replace) {
-                $strContent = preg_replace($search, $replace, $strContent);
+                $strContent = (string) preg_replace($search, (string) $replace, $strContent);
             }
 
-            // Make cdata
-            if (null !== $strContent && \is_string($strContent) && \strlen($strContent) && isset($arrOptions['cdata']) && $arrOptions['cdata']) {
-                $elementCdata = $this->dom->createCDATASection($strContent);
-                $newElement->appendChild($elementCdata);
+            if ('' !== $strContent && !empty($arrOptions['cdata'])) {
+                // Make cdata
+                $newElement->appendChild($this->dom->createCDATASection($strContent));
             } else {
                 $newElement->textContent = $strContent;
             }
         }
 
-        return $parentNode->appendChild($newElement);
+        $parentNode->appendChild($newElement);
+
+        return $newElement;
     }
 
     private function appendItemGroupField(ItemGroup $objItemGroup, \DOMElement $parentNode): \DOMElement
     {
-        $newElement = $this->dom->createElement($objItemGroup->getName());
+        $newElement = $this->addAttributes($this->dom->createElement($objItemGroup->getName()), $objItemGroup->getAttributes());
 
-        // Add attributes
-        $this->addAttributes($newElement, $objItemGroup->getAttributes());
-
-        $items = $objItemGroup->getChannelItemFields();
-
-        foreach ($items as $xmlSubElement) {
-            $className = \get_class($xmlSubElement);
-
-            switch ($className) {
-                // Element is a single field
-                case Item::class:
-                    $this->appendItemField($xmlSubElement, $newElement);
-                    break;
-
-                // Element is a group item
-                case ItemGroup::class:
-                    $this->appendItemGroupField($xmlSubElement, $newElement);
-                    break;
+        foreach ($objItemGroup->getChannelItemFields() as $xmlSubElement) {
+            if ($xmlSubElement instanceof ItemInterface) {
+                $this->appendElementIntoNode($xmlSubElement, $newElement);
             }
         }
 
-        return $parentNode->appendChild($newElement);
+        $parentNode->appendChild($newElement);
+
+        return $newElement;
     }
 
     private function addAttributes(\DOMElement $node, array $arrAttributes): \DOMElement
     {
         foreach ($arrAttributes as $attrName => $attrValue) {
-            //$attribute = $this->dom->createAttribute($attrName);
-            //$attribute->value = $attrValue;
-            //$elements[] = $node->appendChild($attribute);
-            $node->setAttribute($attrName, $attrValue);
+            $node->setAttribute((string) $attrName, (string) $attrValue);
         }
 
         return $node;

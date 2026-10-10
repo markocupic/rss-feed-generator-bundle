@@ -18,14 +18,11 @@ use Markocupic\RssFeedGeneratorBundle\Formatter\Formatter;
 
 class FeedFactory
 {
-    private Formatter $formatter;
-
-    public function __construct(Formatter $formatter)
+    public function __construct(private readonly Formatter $formatter)
     {
-        $this->formatter = $formatter;
     }
 
-    public function createFeed(string $encoding): Feed
+    public function createFeed(string $encoding = Feed::ENCODING_UTF8): Feed
     {
         return new Feed($this->formatter, $encoding);
     }
